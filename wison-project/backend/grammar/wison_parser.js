@@ -72,12 +72,12 @@
   }
 */
 var wison_parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,14],$V1=[1,18],$V2=[13,15],$V3=[35,37],$V4=[1,29],$V5=[1,37],$V6=[1,33],$V7=[1,34],$V8=[1,35],$V9=[1,36],$Va=[33,36],$Vb=[1,43],$Vc=[1,44],$Vd=[1,45],$Ve=[19,20,21,22,24],$Vf=[1,51],$Vg=[1,50],$Vh=[19,41],$Vi=[16,19,36,41];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,16],$V1=[1,20],$V2=[15,17],$V3=[37,39],$V4=[1,31],$V5=[1,39],$V6=[1,35],$V7=[1,36],$V8=[1,37],$V9=[1,38],$Va=[35,38],$Vb=[1,45],$Vc=[1,46],$Vd=[1,47],$Ve=[21,22,23,24,26],$Vf=[1,53],$Vg=[1,52],$Vh=[21,43],$Vi=[18,21,38,43];
 var parser = {trace: function trace () { },
 yy: {},
-symbols_: {"error":2,"program":3,"WISON":4,"WISON_OPEN":5,"lex_block":6,"syntax_block":7,"WISON_CLOSE":8,"EOF":9,"LEX":10,"LEX_OPEN":11,"terminal_decl_list":12,"LEX_CLOSE":13,"terminal_decl":14,"TERMINAL_KW":15,"TERMINAL_NAME":16,"ARROW":17,"regex_expr":18,"SEMICOLON":19,"STAR":20,"PLUS":21,"QUESTION":22,"LPAREN":23,"RPAREN":24,"LITERAL":25,"RANGE_ALPHA":26,"RANGE_DIGIT":27,"SYNTAX":28,"SYNTAX_OPEN":29,"nt_decl_list":30,"initial_decl":31,"production_list":32,"SYNTAX_CLOSE":33,"nt_decl":34,"NO_TERMINAL_KW":35,"NT_NAME":36,"INITIAL_SIM_KW":37,"production":38,"PROD_ARROW":39,"alternative_list":40,"PIPE":41,"symbol_list":42,"symbol":43,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"WISON",5:"WISON_OPEN",8:"WISON_CLOSE",9:"EOF",10:"LEX",11:"LEX_OPEN",13:"LEX_CLOSE",15:"TERMINAL_KW",16:"TERMINAL_NAME",17:"ARROW",19:"SEMICOLON",20:"STAR",21:"PLUS",22:"QUESTION",23:"LPAREN",24:"RPAREN",25:"LITERAL",26:"RANGE_ALPHA",27:"RANGE_DIGIT",28:"SYNTAX",29:"SYNTAX_OPEN",33:"SYNTAX_CLOSE",35:"NO_TERMINAL_KW",36:"NT_NAME",37:"INITIAL_SIM_KW",39:"PROD_ARROW",41:"PIPE"},
-productions_: [0,[3,6],[3,5],[6,4],[6,3],[12,2],[12,1],[14,5],[18,2],[18,2],[18,2],[18,4],[18,3],[18,1],[18,1],[18,1],[18,1],[7,6],[30,2],[30,1],[34,3],[31,3],[32,2],[32,1],[38,4],[40,3],[40,2],[40,1],[42,2],[42,1],[43,1],[43,1]],
+symbols_: {"error":2,"program":3,"wison_open":4,"lex_block":5,"syntax_block":6,"WISON_CLOSE":7,"EOF":8,"WISON":9,"WISON_OPEN":10,"WISON_OPEN_JOINED":11,"LEX":12,"LEX_OPEN":13,"terminal_decl_list":14,"LEX_CLOSE":15,"terminal_decl":16,"TERMINAL_KW":17,"TERMINAL_NAME":18,"ARROW":19,"regex_expr":20,"SEMICOLON":21,"STAR":22,"PLUS":23,"QUESTION":24,"LPAREN":25,"RPAREN":26,"LITERAL":27,"RANGE_ALPHA":28,"RANGE_DIGIT":29,"SYNTAX":30,"SYNTAX_OPEN":31,"nt_decl_list":32,"initial_decl":33,"production_list":34,"SYNTAX_CLOSE":35,"nt_decl":36,"NO_TERMINAL_KW":37,"NT_NAME":38,"INITIAL_SIM_KW":39,"production":40,"PROD_ARROW":41,"alternative_list":42,"PIPE":43,"symbol_list":44,"symbol":45,"$accept":0,"$end":1},
+terminals_: {2:"error",7:"WISON_CLOSE",8:"EOF",9:"WISON",10:"WISON_OPEN",11:"WISON_OPEN_JOINED",12:"LEX",13:"LEX_OPEN",15:"LEX_CLOSE",17:"TERMINAL_KW",18:"TERMINAL_NAME",19:"ARROW",21:"SEMICOLON",22:"STAR",23:"PLUS",24:"QUESTION",25:"LPAREN",26:"RPAREN",27:"LITERAL",28:"RANGE_ALPHA",29:"RANGE_DIGIT",30:"SYNTAX",31:"SYNTAX_OPEN",35:"SYNTAX_CLOSE",37:"NO_TERMINAL_KW",38:"NT_NAME",39:"INITIAL_SIM_KW",41:"PROD_ARROW",43:"PIPE"},
+productions_: [0,[3,5],[3,4],[4,2],[4,1],[5,4],[5,3],[14,2],[14,1],[16,5],[20,2],[20,2],[20,2],[20,4],[20,3],[20,1],[20,1],[20,1],[20,1],[6,6],[32,2],[32,1],[36,3],[33,3],[34,2],[34,1],[40,4],[42,3],[42,2],[42,1],[44,2],[44,1],[45,1],[45,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -89,80 +89,83 @@ break;
 case 2:
  return { terminals:$$[$0-2].terminals, nonTerminals:$$[$0-1].nonTerminals, initialSymbol:$$[$0-1].initialSymbol, productions:$$[$0-1].productions, errors:[] }; 
 break;
-case 3:
+case 3: case 4:
+ this.$ = true; 
+break;
+case 5:
  this.$ = { terminals: $$[$0-1] }; 
 break;
-case 4:
+case 6:
  this.$ = { terminals: [] }; 
 break;
-case 5: case 18: case 22: case 28:
+case 7: case 20: case 24: case 30:
  this.$ = $$[$0-1].concat([$$[$0]]); 
 break;
-case 6: case 19: case 23: case 27: case 29:
+case 8: case 21: case 25: case 29: case 31:
  this.$ = [$$[$0]]; 
 break;
-case 7:
+case 9:
  this.$ = { name:$$[$0-3], pattern:$$[$0-1].pattern, patternType:$$[$0-1].type }; 
 break;
-case 8:
+case 10:
  this.$ = { pattern:'('+$$[$0-1].pattern+')*', type:'kleene' }; 
 break;
-case 9:
+case 11:
  this.$ = { pattern:'('+$$[$0-1].pattern+')+', type:'positive' }; 
 break;
-case 10:
+case 12:
  this.$ = { pattern:'('+$$[$0-1].pattern+')?', type:'optional' }; 
 break;
-case 11:
+case 13:
  this.$ = { pattern:$$[$0-2].pattern+$$[$0].pattern, type:'concat' }; 
 break;
-case 12:
+case 14:
  this.$ = { pattern:$$[$0-1].pattern, type:'group' }; 
 break;
-case 13:
+case 15:
 
             var raw = yytext.slice(1,-1);
             var esc = raw.replace(/[-[\]{}()*+?.,\\^$|#\s]/g,'\\$&');
             this.$ = { pattern:esc, type:'literal' };
         
 break;
-case 14:
+case 16:
  this.$ = { pattern:'[a-zA-Z]', type:'range' }; 
 break;
-case 15:
+case 17:
  this.$ = { pattern:'[0-9]', type:'range' }; 
 break;
-case 16:
+case 18:
  this.$ = { pattern:yytext, type:'reference' }; 
 break;
-case 17:
+case 19:
  this.$ = { nonTerminals:$$[$0-3], initialSymbol:$$[$0-2], productions:$$[$0-1] }; 
 break;
-case 20:
+case 22:
  this.$ = { name:$$[$0-1], isInitial:false }; 
 break;
-case 21:
+case 23:
  this.$ = $$[$0-1]; 
 break;
-case 24:
+case 26:
  this.$ = { head:$$[$0-3], alternatives:$$[$0-1] }; 
 break;
-case 25:
+case 27:
  this.$ = $$[$0-2].concat([$$[$0]]); 
 break;
-case 26:
+case 28:
  this.$ = $$[$0-1].concat([[]]); 
 break;
-case 30:
+case 32:
  this.$ = { name:$$[$0], type:'nonTerminal' }; 
 break;
-case 31:
+case 33:
  this.$ = { name:$$[$0], type:'terminal' }; 
 break;
 }
 },
-table: [{3:1,4:[1,2]},{1:[3]},{5:[1,3]},{6:4,10:[1,5]},{7:6,28:[1,7]},{11:[1,8]},{8:[1,9]},{29:[1,10]},{12:11,13:[1,12],14:13,15:$V0},{1:[2,2],9:[1,15]},{30:16,34:17,35:$V1},{13:[1,19],14:20,15:$V0},{28:[2,4]},o($V2,[2,6]),{16:[1,21]},{1:[2,1]},{31:22,34:23,35:$V1,37:[1,24]},o($V3,[2,19]),{36:[1,25]},{28:[2,3]},o($V2,[2,5]),{17:[1,26]},{32:27,36:$V4,38:28},o($V3,[2,18]),{36:[1,30]},{19:[1,31]},{16:$V5,18:32,23:$V6,25:$V7,26:$V8,27:$V9},{33:[1,38],36:$V4,38:39},o($Va,[2,23]),{39:[1,40]},{19:[1,41]},o($V3,[2,20]),{19:[1,42],20:$Vb,21:$Vc,22:$Vd},{16:$V5,18:46,23:$V6,25:$V7,26:$V8,27:$V9},o($Ve,[2,13]),o($Ve,[2,14]),o($Ve,[2,15]),o($Ve,[2,16]),{8:[2,17]},o($Va,[2,22]),{16:$Vf,36:$Vg,40:47,42:48,43:49},{36:[2,21]},o($V2,[2,7]),o($Ve,[2,8]),o($Ve,[2,9]),o($Ve,[2,10]),{20:$Vb,21:$Vc,22:$Vd,24:[1,52]},{19:[1,53],41:[1,54]},o($Vh,[2,27],{43:55,16:$Vf,36:$Vg}),o($Vi,[2,29]),o($Vi,[2,30]),o($Vi,[2,31]),o($Ve,[2,12],{18:56,16:$V5,23:$V6,25:$V7,26:$V8,27:$V9}),o($Va,[2,24]),o($Vh,[2,26],{43:49,42:57,16:$Vf,36:$Vg}),o($Vi,[2,28]),o($Ve,[2,11]),o($Vh,[2,25],{43:55,16:$Vf,36:$Vg})],
-defaultActions: {12:[2,4],15:[2,1],19:[2,3],38:[2,17],41:[2,21]},
+table: [{3:1,4:2,9:[1,3],11:[1,4]},{1:[3]},{5:5,12:[1,6]},{10:[1,7]},{12:[2,4]},{6:8,30:[1,9]},{13:[1,10]},{12:[2,3]},{7:[1,11]},{31:[1,12]},{14:13,15:[1,14],16:15,17:$V0},{1:[2,2],8:[1,17]},{32:18,36:19,37:$V1},{15:[1,21],16:22,17:$V0},{30:[2,6]},o($V2,[2,8]),{18:[1,23]},{1:[2,1]},{33:24,36:25,37:$V1,39:[1,26]},o($V3,[2,21]),{38:[1,27]},{30:[2,5]},o($V2,[2,7]),{19:[1,28]},{34:29,38:$V4,40:30},o($V3,[2,20]),{38:[1,32]},{21:[1,33]},{18:$V5,20:34,25:$V6,27:$V7,28:$V8,29:$V9},{35:[1,40],38:$V4,40:41},o($Va,[2,25]),{41:[1,42]},{21:[1,43]},o($V3,[2,22]),{21:[1,44],22:$Vb,23:$Vc,24:$Vd},{18:$V5,20:48,25:$V6,27:$V7,28:$V8,29:$V9},o($Ve,[2,15]),o($Ve,[2,16]),o($Ve,[2,17]),o($Ve,[2,18]),{7:[2,19]},o($Va,[2,24]),{18:$Vf,38:$Vg,42:49,44:50,45:51},{38:[2,23]},o($V2,[2,9]),o($Ve,[2,10]),o($Ve,[2,11]),o($Ve,[2,12]),{22:$Vb,23:$Vc,24:$Vd,26:[1,54]},{21:[1,55],43:[1,56]},o($Vh,[2,29],{45:57,18:$Vf,38:$Vg}),o($Vi,[2,31]),o($Vi,[2,32]),o($Vi,[2,33]),o($Ve,[2,14],{20:58,18:$V5,25:$V6,27:$V7,28:$V8,29:$V9}),o($Va,[2,26]),o($Vh,[2,28],{45:51,44:59,18:$Vf,38:$Vg}),o($Vi,[2,30]),o($Ve,[2,13]),o($Vh,[2,27],{45:57,18:$Vf,38:$Vg})],
+defaultActions: {4:[2,4],7:[2,3],14:[2,6],17:[2,1],21:[2,5],40:[2,19],43:[2,23]},
 parseError: function parseError (str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -662,68 +665,70 @@ case 1:
 break;
 case 2:
 break;
-case 3:return 8
+case 3:return 7 //cerradura de wison con posible espacio
 break;
-case 4:return 4
+case 4:return 11 //apertura de wison con posible esapcio
 break;
-case 5:return 5
+case 5:return 9
 break;
-case 6:return 33
+case 6:return 10
 break;
-case 7:return 29
+case 7:return 35
 break;
-case 8:return 13
+case 8:return 31
 break;
-case 9:return 11
+case 9:return 15
 break;
-case 10:return 35
+case 10:return 13
 break;
 case 11:return 37
 break;
-case 12:return 15
+case 12:return 39
 break;
-case 13:return 28
+case 13:return 17
 break;
-case 14:return 10
+case 14:return 30 //palabra reservada de analisis sintactico
 break;
-case 15:return 17
+case 15:return 12 //palabra reservada de analisis lexico
 break;
-case 16:return 39
+case 16:return 19
 break;
-case 17:return 26
+case 17:return 41
 break;
-case 18:return 27
+case 18:return 28 // rango valido del alfabeto
 break;
-case 19:return 25
+case 19:return 29 // rango valido de digitos
 break;
-case 20:return 20
+case 20:return 27
 break;
-case 21:return 21
+case 21:return 22 // estrella de klene
 break;
-case 22:return 22
+case 22:return 23 // suma
 break;
-case 23:return 23
+case 23:return 24 // ?
 break;
-case 24:return 24
+case 24:return 25
 break;
-case 25:return 41
+case 25:return 26
 break;
-case 26:return 19
+case 26:return 43
 break;
-case 27:return 16
+case 27:return 21
 break;
-case 28:return 36
+case 28:return 18
 break;
-case 29:return 36
+case 29:return 38
 break;
-case 30:return 9
+case 30:return 38
 break;
-case 31:
+case 31:return 8 // indica final de texto
+break;
+case 32:
 break;
 }
 },
-rules: [/^(?:\s+)/,/^(?:[/][*][*][\s\S]*?[*][/])/,/^(?:#[^\n]*)/,/^(?:\?Wison\b)/,/^(?:Wison\b)/,/^(?:\u00bf)/,/^(?::\}\})/,/^(?:\{\{:)/,/^(?::\})/,/^(?:\{:)/,/^(?:No_Terminal\b)/,/^(?:Initial_Sim\b)/,/^(?:Terminal\b)/,/^(?:Syntax\b)/,/^(?:Lex\b)/,/^(?:<-)/,/^(?:<=)/,/^(?:\[aA-zZ\])/,/^(?:\[0-9\])/,/^(?:'([^\'\\]|\\.)*')/,/^(?:\*)/,/^(?:\+)/,/^(?:\?)/,/^(?:\()/,/^(?:\))/,/^(?:\|)/,/^(?:;)/,/^(?:\$_[a-zA-Z_][a-zA-Z0-9_]*)/,/^(?:%_[a-zA-Z_][a-zA-Z0-9_]*)/,/^(?:%[a-zA-Z_][a-zA-Z0-9_]*)/,/^(?:$)/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],"inclusive":true}}
+rules: [/^(?:\s+)/,/^(?:[/][*][*][\s\S]*?[*][/])/,/^(?:#[^\n]*)/,/^(?:\?[ \t]*Wison\b)/,/^(?:Wison[ \t]*\u00bf)/,/^(?:Wison\b)/,/^(?:\u00bf)/,/^(?::\}\})/,/^(?:\{\{:)/,/^(?::\})/,/^(?:\{:)/,/^(?:No_Terminal\b)/,/^(?:Initial_Sim\b)/,/^(?:Terminal\b)/,/^(?:Syntax\b)/,/^(?:Lex\b)/,/^(?:<-)/,/^(?:<=)/,/^(?:\[aA-zZ\])/,/^(?:\[0-9\])/,/^(?:'([^\'\\]|\\.)*')/,/^(?:\*)/,/^(?:\+)/,/^(?:\?)/,/^(?:\()/,/^(?:\))/,/^(?:\|)/,/^(?:;)/,/^(?:\$_[a-zA-Z_][a-zA-Z0-9_]*)/,/^(?:%_[a-zA-Z_][a-zA-Z0-9_]*)/,/^(?:%[a-zA-Z_][a-zA-Z0-9_]*)/,/^(?:$)/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32],"inclusive":true}}
 });
 return lexer;
 })();
