@@ -1,1 +1,87 @@
-<p>editor works!</p>
+<div class="editor-page">
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Editor Wison</h2>
+      <div class="header-actions">
+        <label class="btn btn-secondary btn-sm">
+          Cargar archivo
+          <input type="file" accept=".wison,.txt" style="display:none" (change)="onLoadFile($event)">
+        </label>
+        <button class="btn btn-ghost btn-sm" (click)="onClear()">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="code-wrapper">
+      <div class="line-numbers" #lineNumbers>
+        @for (n of lineNumbers_(); track n) {
+          <div class="line-number">{{ n }}</div>
+        }
+      </div>
+      <textarea
+        class="code-editor"
+        #codeArea
+        placeholder="Escribe aquí el código Wison..."
+        [value]="code()"
+        (input)="onCodeInput($event, lineNumbers)"
+        (scroll)="syncScroll(codeArea, lineNumbers)"
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+      ></textarea>
+    </div>
+
+    <div class="parse-bar">
+      <input
+        class="name-input"
+        type="text"
+        placeholder="Nombre del analizador"
+        [value]="name()"
+        (input)="name.set($any($event.target).value)"
+      />
+      <button
+        class="btn btn-primary"
+        (click)="onParse()"
+        [disabled]="loading() || !code().trim() || !name().trim()"
+      >
+        {{ loading() ? 'Procesando...' : 'Compilar' }}
+      </button>
+    </div>
+
+    @if (success()) {
+      <div class="alert alert-success">{{ success() }}</div>
+    }
+
+    <app-error-panel [errors]="errors()" [warnings]="warnings()" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Analizadores creados</h2>
+      <span class="badge-count">{{ analyzers().length }}</span>
+    </div>
+
+    @if (analyzers().length === 0) {
+      <p class="empty-list">No hay analizadores. Compila uno para comenzar.</p>
+    } @else {
+      <ul class="analyzer-list">
+        @for (a of analyzers(); track a.name) {
+          <li class="analyzer-item">
+            <div class="analyzer-info">
+              <span class="analyzer-name">{{ a.name }}</span>
+              <span class="analyzer-meta">
+                {{ a.terminalCount }} terminales · {{ a.ntCount }} no terminales · inicial: {{ a.initialSymbol }}
+              </span>
+              @if (a.warnings.length > 0) {
+                <span class="analyzer-warn">&#9888; {{ a.warnings.length }} advertencia(s)</span>
+              }
+            </div>
+            <button class="btn btn-danger btn-sm" (click)="onDelete(a.name)">Eliminar</button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+</div>

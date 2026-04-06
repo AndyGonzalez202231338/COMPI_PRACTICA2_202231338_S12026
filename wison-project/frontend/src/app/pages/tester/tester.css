@@ -1,0 +1,37 @@
+.tester-page { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; height: calc(100vh - 64px); box-sizing: border-box; }
+@media (max-width: 900px) { .tester-page { grid-template-columns: 1fr; } }
+
+.panel { display: flex; flex-direction: column; gap: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; overflow-y: auto; }
+.panel-header h2 { margin: 0; font-size: 16px; font-weight: 600; color: #2d3748; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 13px; font-weight: 500; color: #4a5568; }
+
+.select { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
+.select:focus { border-color: #4299e1; }
+
+.input-row { display: flex; gap: 8px; }
+.text-input { flex: 1; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: monospace; outline: none; }
+.text-input:focus { border-color: #4299e1; }
+
+.result-badge { padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center; }
+.result-badge.accepted { background: #f0fff4; color: #276749; border: 1px solid #68d391; }
+.result-badge.rejected { background: #fff5f5; color: #c53030; border: 1px solid #fc8181; }
+
+.tokens-section { display: flex; flex-direction: column; gap: 8px; }
+.section-title { font-size: 12px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: .4px; margin: 0; }
+.tokens-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.token { display: flex; flex-direction: column; align-items: center; background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 6px; padding: 4px 8px; min-width: 40px; }
+.token.eof { background: #f7fafc; border-color: #e2e8f0; }
+.token-lexeme { font-family: monospace; font-size: 13px; font-weight: 600; color: #2b6cb0; }
+.token-name   { font-size: 10px; color: #718096; }
+
+.alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; }
+.alert-info { background: #ebf8ff; border: 1px solid #bee3f8; color: #2c5282; }
+
+.btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: opacity .15s; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:not(:disabled):hover { opacity: .85; }
+.btn-primary { background: #4299e1; color: #fff; }
+.btn-ghost   { background: transparent; color: #718096; border: 1px solid #e2e8f0; }
+.btn-sm      { padding: 5px 10px; font-size: 12px; }

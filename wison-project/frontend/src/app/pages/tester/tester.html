@@ -1,1 +1,79 @@
-<p>tester works!</p>
+<div class="tester-page">
+
+  <!-- Panel izquierdo: selección y entrada -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Probar analizador</h2>
+    </div>
+
+    @if (analyzers().length === 0) {
+      <div class="alert alert-info">
+        No hay analizadores disponibles. Ve al Editor y compila uno primero.
+      </div>
+    } @else {
+      <div class="field">
+        <label class="field-label">Analizador</label>
+        <select
+          class="select"
+          [value]="selectedName()"
+          (change)="onSelectAnalyzer($any($event.target).value)"
+        >
+          @for (a of analyzers(); track a.name) {
+            <option [value]="a.name">{{ a.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Cadena de entrada</label>
+        <div class="input-row">
+          <input
+            class="text-input"
+            type="text"
+            placeholder="ej: id + id"
+            [value]="input()"
+            (input)="input.set($any($event.target).value)"
+            (keyup.enter)="onEvaluate()"
+          />
+          <button
+            class="btn btn-primary"
+            (click)="onEvaluate()"
+            [disabled]="loading() || !selectedName()"
+          >{{ loading() ? '...' : 'Evaluar' }}</button>
+          <button class="btn btn-ghost btn-sm" (click)="onClear()">Limpiar</button>
+        </div>
+      </div>
+
+      @if (accepted() !== null) {
+        <div class="result-badge" [class.accepted]="accepted()" [class.rejected]="!accepted()">
+          {{ accepted() ? '✓ Cadena ACEPTADA' : '✗ Cadena RECHAZADA' }}
+        </div>
+      }
+
+      @if (tokens().length > 0) {
+        <div class="tokens-section">
+          <p class="section-title">Tokens reconocidos</p>
+          <div class="tokens-row">
+            @for (t of tokens(); track $index) {
+              <span class="token" [class.eof]="t.name === '$'">
+                <span class="token-lexeme">{{ t.lexeme }}</span>
+                <span class="token-name">{{ t.name }}</span>
+              </span>
+            }
+          </div>
+        </div>
+      }
+
+      <app-error-panel [errors]="errors()" [warnings]="[]" />
+    }
+  </div>
+
+  <!-- Panel derecho: árbol de derivación -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Árbol de derivación</h2>
+    </div>
+    <app-tree-viewer [tree]="tree()" />
+  </div>
+
+</div>
