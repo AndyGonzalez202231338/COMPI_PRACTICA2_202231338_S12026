@@ -1,1 +1,47 @@
-<p>tree-viewer works!</p>
+<div class="tree-viewer">
+  @if (tree()) {
+    <div class="tree-scroll">
+      <svg
+        [attr.width]="svgWidth()"
+        [attr.height]="svgHeight()"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <!-- Aristas -->
+        @for (e of edges(); track $index) {
+          <line
+            [attr.x1]="e.x1"
+            [attr.y1]="e.y1"
+            [attr.x2]="e.x2"
+            [attr.y2]="e.y2"
+            class="edge"
+          />
+        }
+
+        <!-- Nodos -->
+        @for (n of nodes(); track $index) {
+          <g>
+            <rect
+              [attr.x]="nodeX(n)"
+              [attr.y]="nodeY(n)"
+              [attr.width]="nodeW()"
+              [attr.height]="nodeH()"
+              [class]="n.isTerminal ? (n.label === 'ε' ? 'node-eps' : 'node-terminal') : 'node-nt'"
+              rx="6"
+            />
+            <text
+              [attr.x]="n.x"
+              [attr.y]="n.y + nodeH() / 2"
+              text-anchor="middle"
+              dominant-baseline="central"
+              [class]="n.isTerminal ? 'label-terminal' : 'label-nt'"
+            >{{ n.label }}</text>
+          </g>
+        }
+      </svg>
+    </div>
+  } @else {
+    <div class="empty">
+      <p>El árbol de derivación aparecerá aquí cuando se acepte una cadena.</p>
+    </div>
+  }
+</div>
