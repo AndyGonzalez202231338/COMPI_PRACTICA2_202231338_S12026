@@ -14,8 +14,8 @@
 
 "#"[^\n]*                                   {} // comentarios de una linea
 
-"?"[ \t]*"Wison"                            return 'WISON_CLOSE' //cerradura de wison con posible espacio
-"Wison"[ \t]*"\u00bf"                       return 'WISON_OPEN_JOINED' //apertura de wison con posible esapcio
+"?"[ \t]*"Wison"                             return 'WISON_CLOSE' //cerradura de wison con posible espacio
+"Wison"[ \t]*"\u00bf"                         return 'WISON_OPEN_JOINED' //apertura de wison con posible esapcio
 "Wison"                                     return 'WISON'
 "\u00bf"                                    return 'WISON_OPEN'
 
@@ -26,7 +26,7 @@
 
 "No_Terminal"                               return 'NO_TERMINAL_KW'
 "Initial_Sim"                               return 'INITIAL_SIM_KW'
-"Terminal"                                  return 'TERMINAL_KW'
+"Terminal"                                  return 'TERMINAL_KW' 
 "Syntax"                                    return 'SYNTAX' //palabra reservada de analisis sintactico
 "Lex"                                       return 'LEX' //palabra reservada de analisis lexico
 
@@ -39,7 +39,7 @@
 \'([^\'\\]|\\.)*\'                          return 'LITERAL'
 
 "*"                                         return 'STAR' // estrella de klene
-"+"                                         return 'PLUS' // suma
+"+"                                         return 'PLUS' 
 "?"                                         return 'QUESTION' // ?
 "("                                         return 'LPAREN'
 ")"                                         return 'RPAREN'
@@ -51,10 +51,10 @@
 \%[a-zA-Z_][a-zA-Z0-9_]*                   return 'NT_NAME'
 
 <<EOF>>                                     return 'EOF' // indica final de texto
-.                                           {}
+.                                           return 'LEXICAL_ERROR' //si es distinto es error lexico
 
-/lex
 /* -------Asociación y Precedencia de Operadores------- */
+/lex
 %right QUESTION STAR PLUS
 %left  CONCAT
 
@@ -93,27 +93,27 @@ terminal_decl
     ;
 
 regex_expr
-    : regex_expr STAR /* e*   */
+    : regex_expr STAR                                                   /* e*   */
         { $$ = { pattern:'('+$1.pattern+')*', type:'kleene' }; }
-    | regex_expr PLUS /* e+   */
+    | regex_expr PLUS                                                   /* e+   */
         { $$ = { pattern:'('+$1.pattern+')+', type:'positive' }; }
-    | regex_expr QUESTION /* e?   */
+    | regex_expr QUESTION                                               /* e?   */
         { $$ = { pattern:'('+$1.pattern+')?', type:'optional' }; }
-    | LPAREN regex_expr RPAREN regex_expr   %prec CONCAT /* (e1)(e2) */
+    | LPAREN regex_expr RPAREN regex_expr   %prec CONCAT                /* (e1)(e2) */
         { $$ = { pattern:$2.pattern+$4.pattern, type:'concat' }; }
-    | LPAREN regex_expr RPAREN /* (e)  */
+    | LPAREN regex_expr RPAREN                                          /* (e)  */
         { $$ = { pattern:$2.pattern, type:'group' }; }
-    | LITERAL /* 'a'  */
+    | LITERAL                                                           /* 'a'  */
         {
             var raw = yytext.slice(1,-1);
             var esc = raw.replace(/[-[\]{}()*+?.,\\^$|#\s]/g,'\\$&');
             $$ = { pattern:esc, type:'literal' };
         }
-    | RANGE_ALPHA /* [aA-zZ] */
+    | RANGE_ALPHA                                       /* [aA-zZ] */
         { $$ = { pattern:'[a-zA-Z]', type:'range' }; }
-    | RANGE_DIGIT /* [0-9]   */
+    | RANGE_DIGIT                                       /* [0-9]   */
         { $$ = { pattern:'[0-9]', type:'range' }; }
-    | TERMINAL_NAME /* referencia */
+    | TERMINAL_NAME                                     /* referencia */
         { $$ = { pattern:yytext, type:'reference' }; }
     ;
 

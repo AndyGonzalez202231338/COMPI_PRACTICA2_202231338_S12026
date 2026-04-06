@@ -1,11 +1,11 @@
 /* 
    API REST con Express.
    Endpoints:
-     POST /api/parse             parsea código Wison y genera el analizador
-     GET  /api/analyzers         lista todos los analizadores creados
-     GET  /api/analyzers/:name   obtiene un analizador por nombre
-     DELETE /api/analyzers/:name elimina un analizador
-     POST /api/evaluate          evalúa una cadena con un analizador
+     POST   /api/parse              → parsea código Wison y genera el analizador
+     GET    /api/analyzers          → lista todos los analizadores creados
+     GET    /api/analyzers/:name    → obtiene un analizador por nombre
+     DELETE /api/analyzers/:name    → elimina un analizador
+     POST   /api/evaluate           → evalúa una cadena con un analizador
 */
 
 'use strict';
@@ -15,11 +15,12 @@ const cors    = require('cors');
 const fs      = require('fs');
 const path    = require('path');
 
+// Módulos del compilador
 const { symbolTable }  = require('./symbol-table/table.js');
 const { generate }     = require('./src/ll-generator.js');
 const { evaluate }     = require('./src/evaluator.js');
 
-// Cargar el parser generado por Jison 
+// Cargar el parser generado por Jison
 const parserPath = path.join(__dirname, 'grammar', 'wison_parser.js');
 if (!fs.existsSync(parserPath)) {
     console.error('ERROR: grammar/wison_parser.js no existe.');
@@ -31,19 +32,46 @@ const parserModule = { exports: {} };
 new Function('module', 'exports', 'require', parserSrc)(parserModule, parserModule.exports, require);
 const { parser } = parserModule.exports;
 
-/** Parsea código Wison y retorna el AST o lanza un objeto de error. */
+// Persistencia en disco
+const STORAGE_FILE = path.join(__dirname, 'analyzers.json');
+
+function loadFromDisk() {
+    if (!fs.existsSync(STORAGE_FILE)) return;
+    try {
+        const data = JSON.parse(fs.readFileSync(STORAGE_FILE, 'utf8'));
+        if (Array.isArray(data)) {
+            data.forEach(entry => symbolTable.add(entry));
+            console.log(`Cargados ${data.length} analizador(es) desde disco.`);
+        }
+    } catch (e) {
+        console.warn('No se pudo cargar analyzers.json:', e.message);
+    }
+}
+
+function saveToDisk() {
+    try {
+        fs.writeFileSync(STORAGE_FILE, JSON.stringify(symbolTable.getAll(), null, 2), 'utf8');
+    } catch (e) {
+        console.warn('No se pudo guardar analyzers.json:', e.message);
+    }
+}
+
 function parseWison(source) {
     let captured = null;
     parser.yy.parseError = function(msg, hash) {
+        const isLexical = hash?.token === 'LEXICAL_ERROR';
+        const char = hash?.text || '';
         captured = {
-            type:     hash?.token !== undefined ? 'syntactic' : 'lexical',
-            message:  msg,
+            type:     isLexical ? 'lexical' : 'syntactic',
+            message:  isLexical
+                      ? `Carácter no reconocido: "${char}" (U+${char.charCodeAt(0).toString(16).toUpperCase().padStart(4,'0')})`
+                      : msg,
             line:     hash?.loc?.first_line ?? null,
             col:      hash?.loc?.first_column ?? null,
-            expected: hash?.expected ?? null,
-            token:    hash?.token ?? null
+            expected: isLexical ? null : (hash?.expected ?? null),
+            token:    isLexical ? char : (hash?.token ?? null)
         };
-        throw new Error(msg);
+        throw new Error(captured.message);
     };
     try {
         return { ok: true, ast: parser.parse(source) };
@@ -71,20 +99,14 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
+// Cargar analizadores persistidos al arrancar
+loadFromDisk();
 
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', analyzers: symbolTable.size });
 });
 
-/**
- * POST /api/parse
- * Cuerpo: { source: string, name: string }
- * 
- * 1. Normaliza el source
- * 2. Parsea con el parser Wison (léxico + sintáctico)
- * 3. Pasa el AST por ll-generator (semántico + FIRST/FOLLOW/tabla)
- * 4. Guarda en SymbolTable y retorna el resumen
- */ 
+// POST /api/parse
 app.post('/api/parse', (req, res) => {
     const { source, name } = req.body;
 
@@ -97,21 +119,21 @@ app.post('/api/parse', (req, res) => {
 
     const cleanSource = normalizeSource(source);
 
-    // Etapa 1: análisis léxico y sintáctico (Jison) 
+    // Etapa 1: análisis léxico y sintáctico
     const parseResult = parseWison(cleanSource);
     if (!parseResult.ok) {
         return res.status(422).json({
-            ok:     false,
-            stage:  parseResult.type,          // 'lexical' | 'syntactic'
-            error:  parseResult.message,
-            line:   parseResult.line,
-            col:    parseResult.col,
+            ok:       false,
+            stage:    parseResult.type,
+            error:    parseResult.message,
+            line:     parseResult.line,
+            col:      parseResult.col,
             expected: parseResult.expected,
             token:    parseResult.token
         });
     }
 
-    // Etapa 2: análisis semántico + generación LL(1) 
+    // Etapa 2: análisis semántico + generación LL(1)
     const genResult = generate(parseResult.ast, name.trim());
     if (!genResult.ok) {
         return res.status(422).json({
@@ -124,8 +146,9 @@ app.post('/api/parse', (req, res) => {
         });
     }
 
-    // Etapa 3: guardar en tabla de símbolos 
+    // Guardar en tabla y persistir en disco
     symbolTable.add(genResult.entry);
+    saveToDisk();
 
     return res.status(201).json({
         ok:      true,
@@ -140,20 +163,12 @@ app.post('/api/parse', (req, res) => {
     });
 });
 
-
-/**
- * GET /api/analyzers
- * Retorna la lista resumida de todos los analizadores guardados.
- */
+// GET /api/analyzers
 app.get('/api/analyzers', (_req, res) => {
     res.json({ ok: true, analyzers: symbolTable.getSummaries() });
 });
 
-
-/**
- * GET /api/analyzers/:name
- * Retorna el analizador completo (con tabla LL, FIRST, FOLLOW).
- */
+// GET /api/analyzers/:name
 app.get('/api/analyzers/:name', (req, res) => {
     const entry = symbolTable.get(req.params.name);
     if (!entry) {
@@ -162,25 +177,18 @@ app.get('/api/analyzers/:name', (req, res) => {
     res.json({ ok: true, entry });
 });
 
-/**
- * DELETE /api/analyzers/:name
- * Elimina un analizador de la tabla de símbolos.
- */
+// DELETE /api/analyzers/:name
 app.delete('/api/analyzers/:name', (req, res) => {
     const deleted = symbolTable.remove(req.params.name);
     if (!deleted) {
         return res.status(404).json({ ok: false, error: `Analizador "${req.params.name}" no encontrado.` });
     }
+    saveToDisk();
     res.json({ ok: true, message: `Analizador "${req.params.name}" eliminado.` });
 });
 
-/**
- * POST /api/evaluate
- * Cuerpo: { name: string, input: string }
- *
- * Evalúa la cadena de entrada usando el analizador especificado.
- * Retorna si fue aceptada, el árbol de derivación y errores si hubo.
- */
+
+// POST /api/evaluate
 app.post('/api/evaluate', (req, res) => {
     const { name, input } = req.body;
 
