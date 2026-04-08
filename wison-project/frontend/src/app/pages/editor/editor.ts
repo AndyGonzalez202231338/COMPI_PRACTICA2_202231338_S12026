@@ -63,26 +63,28 @@ export class Editor {
         this.loading.set(false);
         const body = err.error;
 
-        if (body?.errors) {
-          // Errores semánticos: array con descripción y NT afectado
-          this.errors.set(body.errors.map((m: string) => ({
-            type:    'semantic' as const,
-            message: m,
-            // Extraer el NT del mensaje para mostrar contexto
-            context: this.extractNT(m)
-          })));
-          // También mostrar recursión izquierda con detalle si existe
-          if (body.leftRecursion?.length) {
-            const extra: AppError[] = body.leftRecursion.map((r: any) => ({
-              type:    'semantic' as const,
-              message: r.description,
-              context: r.nt
-            }));
-            this.errors.set([...this.errors(), ...extra]);
-          }
+        if (body?.errors && Array.isArray(body.errors)) {
+          // Errores con array: léxicos/sintácticos recuperados O semánticos
+          const stage = body.stage || 'syntactic';
+          const mapped: AppError[] = body.errors.map((e: any) => {
+            if (typeof e === 'string') {
+              return { type: stage as any, message: e, context: this.extractNT(e) };
+            }
+            return {
+              type:     (e.type || stage) as any,
+              message:  e.message,
+              line:     e.line  ?? null,
+              col:      e.col   ?? null,
+              expected: Array.isArray(e.expected) ? e.expected.join(' | ') : (e.expected ?? null),
+              found:    e.token ?? e.found ?? null,
+              context:  e.context ?? this.extractNT(e.message)
+            };
+          });
+          this.errors.set(mapped);
         } else {
+          // Error único sin array (fallback)
           this.errors.set([{
-            type:     body?.stage || 'syntactic',
+            type:     (body?.stage || 'syntactic') as any,
             message:  body?.error || err.message,
             line:     body?.line  ?? null,
             col:      body?.col   ?? null,

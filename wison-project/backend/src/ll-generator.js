@@ -1,5 +1,4 @@
 /* 
-   ll-generator.js
    Genera un analizador LL(1) a partir del AST producido por wison.jison
    Pipeline:
      1. Validación semántica
@@ -34,32 +33,53 @@ function validateSemantics(ast) {
     const errors = [];
     const warnings = [];
 
-    const terminalNames = new Set(ast.terminals.map(t => t.name)); // Para validar referencias en patrones (terminal)
-    const ntNames       = new Set(ast.nonTerminals.map(n => n.name)); // Para validar producciones y símbolo inicial (No_Terminal)
+    const terminalNames = new Set(ast.terminals.map(t => t.name));
+    const ntNames       = new Set(ast.nonTerminals.map(n => n.name));
 
     // Símbolo inicial declarado
-    if (!ntNames.has(ast.initialSymbol)) { //ejemplo: initialSymbol = S, pero S no declarado como No_Terminal
-        errors.push(`El símbolo inicial "${ast.initialSymbol}" no está declarado como No_Terminal.`);
+    if (!ntNames.has(ast.initialSymbol)) {
+        const loc = ast.initialSymbolLoc;
+        errors.push({
+            type: 'semantic',
+            message: `El símbolo inicial "${ast.initialSymbol}" no está declarado como No_Terminal.`,
+            line: loc ? loc.line : null,
+            col:  loc ? loc.col  : null
+        });
     }
 
     // Símbolos en producciones deben estar declarados
     const usedNTs = new Set();
     for (const prod of ast.productions) {
         // Cabeza de la producción
-        if (!ntNames.has(prod.head)) { // ejemplo: S -> A B, pero S no declarado como No_Terminal
-            errors.push(`La cabeza de producción "${prod.head}" no fue declarada con No_Terminal.`);
+        if (!ntNames.has(prod.head)) {
+            errors.push({
+                type: 'semantic',
+                message: `La cabeza de producción "${prod.head}" no fue declarada con No_Terminal.`,
+                line: prod.line || null,
+                col:  prod.col  || null
+            });
         }
-        for (const alt of prod.alternatives) { // ejemplo: S -> A B | C, entonces alt = [A B] y alt = [C]
+        for (const alt of prod.alternatives) {
             for (const sym of alt) {
                 if (sym.type === 'nonTerminal') {
                     usedNTs.add(sym.name);
-                    if (!ntNames.has(sym.name)) { // ejemplo: S -> A B, pero A no declarado como No_Terminal
-                        errors.push(`No terminal "${sym.name}" usado en producción de "${prod.head}" pero no declarado.`);
+                    if (!ntNames.has(sym.name)) {
+                        errors.push({
+                            type: 'semantic',
+                            message: `No terminal "${sym.name}" usado en producción de "${prod.head}" pero no declarado.`,
+                            line: sym.line || null,
+                            col:  sym.col  || null
+                        });
                     }
                 } else {
                     // terminal
-                    if (!terminalNames.has(sym.name)) { // ejemplo: S -> a B, pero a no declarado como Terminal
-                        errors.push(`Terminal "${sym.name}" usado en producción de "${prod.head}" pero no declarado en el bloque Lex.`);
+                    if (!terminalNames.has(sym.name)) {
+                        errors.push({
+                            type: 'semantic',
+                            message: `Terminal "${sym.name}" usado en producción de "${prod.head}" pero no declarado en el bloque Lex.`,
+                            line: sym.line || null,
+                            col:  sym.col  || null
+                        });
                     }
                 }
             }
@@ -67,24 +87,28 @@ function validateSemantics(ast) {
     }
 
     // Referencias en patrones de terminales deben apuntar a terminales declarados
-    // Ejemplo: $_Decimal pattern = "([0-9])*\\.$([0-9])+" -> referencia a $_Punto que no está declarado como terminal
     for (const t of ast.terminals) {
         if (t.patternType === 'reference' || t.patternType === 'concat') {
-            // Buscar referencias $_Nombre dentro del patrón
-            const refs = t.pattern.match(/\$_[a-zA-Z_][a-zA-Z0-9_]*/g) || []; // ejemplo: pattern = "([0-9])*$_Punto([0-9])+" -> refs = ["$_Punto"]
+            const refs = t.pattern.match(/\$_[a-zA-Z_][a-zA-Z0-9_]*/g) || [];
             for (const ref of refs) {
                 if (!terminalNames.has(ref)) {
-                    errors.push(`Terminal "${t.name}" referencia a "${ref}" que no está declarado.`);
+                    errors.push({
+                        type: 'semantic',
+                        message: `Terminal "${t.name}" referencia a "${ref}" que no está declarado.`,
+                        line: t.line || null,
+                        col:  t.col  || null
+                    });
                 }
             }
         }
     }
 
     // NT declarados pero sin producción
-    const headsWithProds = new Set(ast.productions.map(p => p.head)); // ejemplo: S -> A B, entonces headsWithProds = {S}
-    for (const nt of ntNames) {
-        if (!headsWithProds.has(nt)) { // ejemplo: S -> A B, pero S no declarado como No_Terminal, entonces ntNames = {S}, headsWithProds = {}, entonces se genera un warning
-            warnings.push(`No terminal "${nt}" declarado pero sin producción definida.`);
+    const headsWithProds = new Set(ast.productions.map(p => p.head));
+    for (const nt of ast.nonTerminals) {
+        if (!headsWithProds.has(nt.name)) {
+            const locStr = nt.line ? ` (línea ${nt.line}, columna ${nt.col})` : '';
+            warnings.push(`No terminal "${nt.name}" declarado pero sin producción definida${locStr}.`);
         }
     }
 
@@ -386,7 +410,7 @@ function buildParseTable(ast, firstSets, followSets) {
         const A = prod.head;
 
         prod.alternatives.forEach((alt, altIndex) => {
-            const entry = { head: A, body: alt, altIndex };
+            const entry = { head: A, body: alt, altIndex, line: prod.line || null, col: prod.col || null };
 
             // FIRST de esta alternativa
             const firstAlpha = alt.length === 0
@@ -488,13 +512,13 @@ function generate(ast, name) {
         return result;
     }
 
-    // Etapa 2: Resolver referencias de terminales 
+    // Etapa 2: Resolver referencias de terminales
     const terminalsCopy = ast.terminals.map(t => ({ ...t }));
     let terminalPatterns;
     try {
         terminalPatterns = resolveTerminalReferences(terminalsCopy);
     } catch (e) {
-        result.errors = [e.message];
+        result.errors = [{ type: 'semantic', message: e.message, line: null, col: null }];
         result.type = 'semantic';
         return result;
     }
@@ -503,7 +527,7 @@ function generate(ast, name) {
     const leftRecursion = detectLeftRecursion(ast);
     if (leftRecursion.length > 0) {
         result.leftRecursion = leftRecursion;
-        result.errors = leftRecursion.map(r => r.description);
+        result.errors = leftRecursion.map(r => ({ type: 'semantic', message: r.description, line: null, col: null }));
         result.type = 'semantic';
         return result;
     }
@@ -516,7 +540,12 @@ function generate(ast, name) {
     const { table, conflicts } = buildParseTable(ast, firstSets, followSets);
 
     if (conflicts.length > 0) {
-        result.errors = conflicts.map(c => c.description);
+        result.errors = conflicts.map(c => ({
+            type: 'semantic',
+            message: c.description,
+            line: c.incoming?.line || c.existing?.line || null,
+            col:  c.incoming?.col  || c.existing?.col  || null
+        }));
         result.type = 'semantic';
         // Adjuntamos los conflictos con detalle por si el frontend los quiere mostrar
         result.conflicts = conflicts;

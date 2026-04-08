@@ -46,7 +46,7 @@
 
       @if (accepted() !== null) {
         <div class="result-badge" [class.accepted]="accepted()" [class.rejected]="!accepted()">
-          {{ accepted() ? '✓ Cadena ACEPTADA' : '✗ Cadena RECHAZADA' }}
+          {{ accepted() ? 'Cadena ACEPTADA' : 'Cadena RECHAZADA' }}
         </div>
       }
 
