@@ -40,7 +40,7 @@ export class ErrorPanel {
   }
 
   hasLocation(e: AppError): boolean {
-    return e.line != null && e.line !== undefined;
+    return e.type !== 'semantic' && e.line != null;
   }
 
   locationText(e: AppError): string {

@@ -15,30 +15,32 @@
   @if (errors().length > 0) {
     <div class="section">
       <p class="section-title">Errores ({{ errors().length }})</p>
-      @for (e of errors(); track $index) {
-        <div class="entry error">
-          <div class="entry-header">
-            <span class="badge" [ngClass]="typeClass(e.type)">{{ typeLabel(e.type) }}</span>
-            @if (hasLocation(e)) {
-              <span class="location">{{ locationText(e) }}</span>
+      <div class="entries-scroll">
+        @for (e of errors(); track $index) {
+          <div class="entry error">
+            <div class="entry-header">
+              <span class="badge" [ngClass]="typeClass(e.type)">{{ typeLabel(e.type) }}</span>
+              @if (hasLocation(e)) {
+                <span class="location">{{ locationText(e) }}</span>
+              }
+              @if (e.context) {
+                <span class="context">en {{ e.context }}</span>
+              }
+            </div>
+            <span class="msg">{{ e.message }}</span>
+            @if (e.expected) {
+              <span class="hint">
+                <strong>Esperaba:</strong> {{ e.expected }}
+              </span>
             }
-            @if (e.context) {
-              <span class="context">en {{ e.context }}</span>
+            @if (e.found) {
+              <span class="hint">
+                <strong>Encontró:</strong> {{ e.found }}
+              </span>
             }
           </div>
-          <span class="msg">{{ e.message }}</span>
-          @if (e.expected) {
-            <span class="hint">
-              <strong>Esperaba:</strong> {{ e.expected }}
-            </span>
-          }
-          @if (e.found) {
-            <span class="hint">
-              <strong>Encontró:</strong> {{ e.found }}
-            </span>
-          }
-        </div>
-      }
+        }
+      </div>
     </div>
   }
 

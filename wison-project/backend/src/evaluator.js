@@ -1,4 +1,4 @@
-/* evaluator.js
+/* 
    Analiza una cadena de entrada usando la tabla LL(1) generada
    por ll-generator.js y construye el árbol de derivación.
 
@@ -9,9 +9,9 @@
      4. Retornar EvalResult con árbol o errores
 */
 
-'use strict'; // Asegura que no se usen variables globales por error
-
+'use strict';
 const EOF_SYM = '$';
+
 class TreeNode {
     constructor(label, isTerminal = false, lexeme = null) {
         this.label      = label;       // nombre del símbolo: %_E, $_id, ε
@@ -38,7 +38,6 @@ class TreeNode {
 }
 
 /**
- * Tokenizar la entrada usando los patrones regex del entry.
  * tokenize(input, terminalPatterns)
  *
  * Convierte la cadena de entrada en un array de tokens usando los
@@ -57,12 +56,27 @@ function tokenize(input, terminalPatterns) {
     const errors = [];
     let pos = 0;
 
-    // Compilar patrones una sola vez
-    // terminalPatterns es { '$_nombre': 'regex_string' }
-    const compiled = Object.entries(terminalPatterns).map(([name, pattern]) => ({
-        name,
-        regex: new RegExp('^(?:' + pattern + ')', 'u')
-    }));
+    /**  
+     * Compilar patrones una sola vez
+     * terminalPatterns es { '$_nombre': 'regex_string' }
+     * Nota: se usa flag sin 'u' porque algunos escapes como \- no son válidos
+     * en modo unicode. Limpiamos \- -> - antes de compilar.
+     */
+    const compiled = Object.entries(terminalPatterns).map(([name, pattern]) => {
+        // Limpiar escapes inválidos en modo unicode:
+        // \- fuera de clase de caracteres no es válido con /u
+        const cleanPattern = pattern.replace(/\\-/g, '-');
+        try {
+            return { name, regex: new RegExp('^(?:' + cleanPattern + ')', 'u') };
+        } catch(e) {
+            try {
+                return { name, regex: new RegExp('^(?:' + cleanPattern + ')') };
+            } catch(e2) {
+                console.warn('Patrón regex inválido para', name, ':', cleanPattern, e2.message);
+                return { name, regex: null };
+            }
+        }
+    }).filter(c => c.regex !== null);
 
     while (pos < input.length) {
         // Saltar espacios en blanco
@@ -108,7 +122,6 @@ function tokenize(input, terminalPatterns) {
 }
 
 /**
- * Análisis LL(1) + construcción del árbol
  * analyze(tokens, parseTable, initialSymbol)
  *
  * Algoritmo LL(1) clásico con pila.
@@ -154,7 +167,7 @@ function analyze(tokens, parseTable, initialSymbol) {
         const token  = currentToken();
         const tokName = token.name;
 
-        // Caso 1: cima = $
+        // Caso 1: cima = $ 
         if (top.symbol === EOF_SYM) {
             if (tokName === EOF_SYM) {
                 const clean = errors.length === 0;
@@ -174,7 +187,7 @@ function analyze(tokens, parseTable, initialSymbol) {
             }
         }
 
-        // Caso 2: cima es terminal distinto de EOF
+        // Caso 2: cima es terminal
         if (top.symbol !== EOF_SYM && isTerminal(top.symbol)) {
             if (top.symbol === tokName) {
                 // Coincidencia: consumir token
@@ -204,7 +217,7 @@ function analyze(tokens, parseTable, initialSymbol) {
             continue;
         }
 
-        // Caso 3: cima es no terminal 
+        // Caso 3: cima es no terminal
         if (isNonTerminal(top.symbol)) {
             const row = parseTable[top.symbol];
             const entry = row ? row[tokName] : undefined;
@@ -270,16 +283,18 @@ function analyze(tokens, parseTable, initialSymbol) {
             continue;
         }
 
-        // Caso no esperado: símbolo desconocido en la pila 
+        // Caso no esperado: símbolo desconocido en la pila
         stack.pop();
     }
 
-    // Si salimos del while sin ACCEPT, la cadena fue rechazada
+    // Si sale del while sin ACCEPT, la cadena fue rechazada
     return { accepted: false, root, steps, errors };
 }
 
 function isTerminal(symbol) {
-    return symbol === EOF_SYM || symbol.startsWith('$_') || symbol === 'ε';
+    return symbol === EOF_SYM ||
+           symbol.startsWith('$_') ||
+           symbol === 'ε';
 }
 
 function isNonTerminal(symbol) {
@@ -337,5 +352,4 @@ function evaluate(entry, input) {
     };
 }
 
-// Exports
 module.exports = { evaluate, tokenize, analyze, TreeNode, EOF_SYM };
