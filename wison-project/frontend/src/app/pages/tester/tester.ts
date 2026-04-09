@@ -55,9 +55,10 @@ export class Tester implements OnInit {
         this.errors.set((res.errors || []).map((e: any) => ({
           type:     e.type,
           message:  e.message,
-          pos:      e.pos,
-          expected: e.expected,
-          found:    e.found
+          line:     e.line  ?? null,
+          col:      e.col   ?? null,
+          expected: Array.isArray(e.expected) ? e.expected.join(', ') : (e.expected ?? null),
+          found:    e.found ?? null
         })));
       },
       error: (err: any) => {
@@ -71,6 +72,15 @@ export class Tester implements OnInit {
     this.selectedName.set(name);
     this.analyzerSvc.select(name);
     this.reset();
+  }
+
+  onLoadFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => this.input.set(reader.result as string);
+    reader.readAsText(file);
   }
 
   onClear(): void {

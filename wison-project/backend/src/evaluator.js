@@ -54,17 +54,20 @@ class TreeNode {
 function tokenize(input, terminalPatterns) {
     const tokens = [];
     const errors = [];
-    let pos = 0;
+    let pos  = 0;
+    let line = 1;
+    let col  = 1;
 
-    /**  
-     * Compilar patrones una sola vez
-     * terminalPatterns es { '$_nombre': 'regex_string' }
-     * Nota: se usa flag sin 'u' porque algunos escapes como \- no son válidos
-     * en modo unicode. Limpiamos \- -> - antes de compilar.
-     */
+    // Avanzar pos/line/col n caracteres
+    function advance(n) {
+        for (let i = 0; i < n; i++) {
+            if (input[pos] === '\n') { line++; col = 1; }
+            else { col++; }
+            pos++;
+        }
+    }
+
     const compiled = Object.entries(terminalPatterns).map(([name, pattern]) => {
-        // Limpiar escapes inválidos en modo unicode:
-        // \- fuera de clase de caracteres no es válido con /u
         const cleanPattern = pattern.replace(/\\-/g, '-');
         try {
             return { name, regex: new RegExp('^(?:' + cleanPattern + ')', 'u') };
@@ -82,7 +85,7 @@ function tokenize(input, terminalPatterns) {
         // Saltar espacios en blanco
         const spaceMatch = input.slice(pos).match(/^\s+/u);
         if (spaceMatch) {
-            pos += spaceMatch[0].length;
+            advance(spaceMatch[0].length);
             continue;
         }
 
@@ -101,22 +104,22 @@ function tokenize(input, terminalPatterns) {
         }
 
         if (bestMatch !== null) {
-            tokens.push({ name: bestName, lexeme: bestMatch, pos });
-            pos += bestLen;
+            tokens.push({ name: bestName, lexeme: bestMatch, pos, line, col });
+            advance(bestLen);
         } else {
             // Carácter no reconocido
             errors.push({
                 type:    'lexical',
                 message: `Carácter no reconocido: "${input[pos]}"`,
-                pos,
+                pos, line, col,
                 char:    input[pos]
             });
-            pos++; // avanzar para no quedar en loop infinito
+            advance(1);
         }
     }
 
-    // Agregar token de fin de cadena
-    tokens.push({ name: EOF_SYM, lexeme: EOF_SYM, pos });
+    // Token de fin de cadena
+    tokens.push({ name: EOF_SYM, lexeme: EOF_SYM, pos, line, col });
 
     return { tokens, errors };
 }
@@ -201,6 +204,8 @@ function analyze(tokens, parseTable, initialSymbol) {
                     type:     'syntactic',
                     message:  `Se esperaba "${top.symbol}" pero se encontró "${tokName}" ("${token.lexeme}")`,
                     pos:      token.pos,
+                    line:     token.line,
+                    col:      token.col,
                     expected: top.symbol,
                     found:    tokName
                 };
@@ -260,23 +265,39 @@ function analyze(tokens, parseTable, initialSymbol) {
 
             } else {
                 // Celda vacía en la tabla → error sintáctico
-                const expected = row ? Object.keys(row).join(', ') : 'ninguno';
+                const validTokens = row ? Object.keys(row) : [];
+                const expected = validTokens.join(', ') || 'ninguno';
                 const err = {
                     type:     'syntactic',
                     message:  `Error sintáctico en "${tokName}" ("${token.lexeme}"). ` +
                               `No hay producción para M["${top.symbol}"]["${tokName}"]. ` +
                               `Tokens válidos: ${expected}`,
                     pos:      token.pos,
+                    line:     token.line,
+                    col:      token.col,
                     expected,
                     found:    tokName
                 };
                 errors.push(err);
                 recordStep('ERROR', err.message);
 
-                // Recuperación: modo pánico — descartar token
-                if (tokenIndex < tokens.length - 1) {
+                // Recuperación modo pánico:
+                // Saltar tokens hasta encontrar uno que esté en FIRST(NT actual)
+                // o en FOLLOW(NT actual) — conjunto de sincronización.
+                // Si llegamos a EOF sin encontrar nada, sacar el NT de la pila.
+                const syncSet = new Set(validTokens);
+                syncSet.add(EOF_SYM);
+                let advanced = false;
+                while (tokenIndex < tokens.length - 1) {
                     tokenIndex++;
-                } else {
+                    if (syncSet.has(tokens[tokenIndex].name)) {
+                        advanced = true;
+                        break;
+                    }
+                }
+                // Si encontramos un token del sync set que está en FOLLOW (no en FIRST),
+                // sacar el NT de la pila para que el padre lo maneje
+                if (!advanced || !row || !row[tokens[tokenIndex].name]) {
                     stack.pop();
                 }
             }

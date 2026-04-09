@@ -10,9 +10,26 @@
 .select { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
 .select:focus { border-color: #4299e1; }
 
-.input-row { display: flex; gap: 8px; }
-.text-input { flex: 1; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: monospace; outline: none; }
-.text-input:focus { border-color: #4299e1; }
+.code-input {
+  width: 100%;
+  min-height: 180px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  color: #2d3748;
+  background: #fafafa;
+}
+.code-input:focus { border-color: #4299e1; background: #fff; }
+
+.input-actions { display: flex; gap: 8px; align-items: center; }
+.input-actions .btn-primary { margin-left: auto; }
+.btn-secondary { background: #edf2f7; color: #4a5568; }
 
 .result-badge { padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center; }
 .result-badge.accepted { background: #f0fff4; color: #276749; border: 1px solid #68d391; }

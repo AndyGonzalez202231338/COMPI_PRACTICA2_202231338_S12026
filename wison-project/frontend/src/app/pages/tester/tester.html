@@ -25,22 +25,28 @@
       </div>
 
       <div class="field">
-        <label class="field-label">Cadena de entrada</label>
-        <div class="input-row">
-          <input
-            class="text-input"
-            type="text"
-            placeholder="ej: id + id"
-            [value]="input()"
-            (input)="input.set($any($event.target).value)"
-            (keyup.enter)="onEvaluate()"
-          />
+        <label class="field-label">Programa de entrada</label>
+        <textarea
+          class="code-input"
+          placeholder="ej: var x = 1 + 2;"
+          [value]="input()"
+          (input)="input.set($any($event.target).value)"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        ></textarea>
+        <div class="input-actions">
+          <label class="btn btn-secondary btn-sm">
+            Cargar archivo
+            <input type="file" style="display:none" (change)="onLoadFile($event)">
+          </label>
+          <button class="btn btn-ghost btn-sm" (click)="onClear()">Limpiar</button>
           <button
             class="btn btn-primary"
             (click)="onEvaluate()"
             [disabled]="loading() || !selectedName()"
-          >{{ loading() ? '...' : 'Evaluar' }}</button>
-          <button class="btn btn-ghost btn-sm" (click)="onClear()">Limpiar</button>
+          >{{ loading() ? 'Evaluando...' : 'Evaluar' }}</button>
         </div>
       </div>
 

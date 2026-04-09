@@ -267,6 +267,9 @@ production_list
 production
     : NT_NAME PROD_ARROW alternative_list SEMICOLON
         { $$ = { head:$1, alternatives:$3, line:@1.first_line, col:@1.first_column }; }
+    /* Producción épsilon: %_NT <= ; */
+    | NT_NAME PROD_ARROW SEMICOLON
+        { $$ = { head:$1, alternatives:[[]], line:@1.first_line, col:@1.first_column }; }
     /* Recuperación: error en el cuerpo de la producción */
     | NT_NAME error SEMICOLON
         {
