@@ -523,6 +523,30 @@ function generate(ast, name) {
         return result;
     }
 
+    // Filtrar terminales "macro": solo se usan como referencia en otros terminales
+    // pero nunca aparecen en ninguna producción. No deben emitirse como tokens.
+    const terminalsInProductions = new Set();
+    for (const prod of ast.productions) {
+        for (const alt of prod.alternatives) {
+            for (const sym of alt) {
+                if (sym.type === 'terminal') terminalsInProductions.add(sym.name);
+            }
+        }
+    }
+    const macroTerminals = new Set(
+        Object.keys(terminalPatterns).filter(n => !terminalsInProductions.has(n))
+    );
+    const publicTerminalPatterns = {};
+    for (const [name, pat] of Object.entries(terminalPatterns)) {
+        if (!macroTerminals.has(name)) publicTerminalPatterns[name] = pat;
+    }
+    if (macroTerminals.size > 0) {
+        const macroWarnings = [...macroTerminals].map(n =>
+            `Terminal "${n}" se usa solo como macro (no aparece en producciones) y se excluye del tokenizador.`
+        );
+        warnings.push(...macroWarnings);
+    }
+
     // Etapa 3: Detectar recursión izquierda
     const leftRecursion = detectLeftRecursion(ast);
     if (leftRecursion.length > 0) {
@@ -558,7 +582,7 @@ function generate(ast, name) {
         entry: {
             name,
             grammar:         ast,
-            terminalPatterns,
+            terminalPatterns: publicTerminalPatterns,
             firstSets:       setsToArrays(firstSets),
             followSets:      setsToArrays(followSets),
             parseTable:      table,

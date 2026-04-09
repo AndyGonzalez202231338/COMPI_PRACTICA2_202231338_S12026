@@ -6026,5 +6026,1417 @@
     },
     "warnings": [],
     "createdAt": "2026-04-08T17:20:17.667Z"
+  },
+  {
+    "name": "complejo",
+    "grammar": {
+      "terminals": [
+        {
+          "name": "$_Mas",
+          "pattern": "\\+",
+          "patternType": "literal",
+          "line": 6,
+          "col": 11
+        },
+        {
+          "name": "$_Menos",
+          "pattern": "-",
+          "patternType": "literal",
+          "line": 7,
+          "col": 11
+        },
+        {
+          "name": "$_Multiplicacion",
+          "pattern": "\\*",
+          "patternType": "literal",
+          "line": 8,
+          "col": 11
+        },
+        {
+          "name": "$_Division",
+          "pattern": "/",
+          "patternType": "literal",
+          "line": 9,
+          "col": 11
+        },
+        {
+          "name": "$_Igual",
+          "pattern": "=",
+          "patternType": "literal",
+          "line": 10,
+          "col": 11
+        },
+        {
+          "name": "$_PuntoComa",
+          "pattern": ";",
+          "patternType": "literal",
+          "line": 11,
+          "col": 11
+        },
+        {
+          "name": "$_ParAbre",
+          "pattern": "\\(",
+          "patternType": "literal",
+          "line": 12,
+          "col": 11
+        },
+        {
+          "name": "$_ParCierra",
+          "pattern": "\\)",
+          "patternType": "literal",
+          "line": 13,
+          "col": 11
+        },
+        {
+          "name": "$_LlaveAbre",
+          "pattern": "\\{",
+          "patternType": "literal",
+          "line": 14,
+          "col": 11
+        },
+        {
+          "name": "$_LlaveCierra",
+          "pattern": "\\}",
+          "patternType": "literal",
+          "line": 15,
+          "col": 11
+        },
+        {
+          "name": "$_Var",
+          "pattern": "var",
+          "patternType": "concat",
+          "line": 18,
+          "col": 11
+        },
+        {
+          "name": "$_If",
+          "pattern": "if",
+          "patternType": "concat",
+          "line": 19,
+          "col": 11
+        },
+        {
+          "name": "$_While",
+          "pattern": "while",
+          "patternType": "concat",
+          "line": 20,
+          "col": 11
+        },
+        {
+          "name": "$_Letra",
+          "pattern": "[a-zA-Z]",
+          "patternType": "range",
+          "line": 23,
+          "col": 11
+        },
+        {
+          "name": "$_Digito",
+          "pattern": "[0-9]",
+          "patternType": "range",
+          "line": 24,
+          "col": 11
+        },
+        {
+          "name": "$_ID",
+          "pattern": "($_Letra)+($_Digito)*",
+          "patternType": "concat",
+          "line": 27,
+          "col": 11
+        },
+        {
+          "name": "$_Num",
+          "pattern": "($_Digito)+($_Digito)?",
+          "patternType": "concat",
+          "line": 30,
+          "col": 11
+        }
+      ],
+      "nonTerminals": [
+        {
+          "name": "%_Programa",
+          "isInitial": false,
+          "line": 37,
+          "col": 14
+        },
+        {
+          "name": "%_ListaSentencias",
+          "isInitial": false,
+          "line": 38,
+          "col": 14
+        },
+        {
+          "name": "%_Sentencia",
+          "isInitial": false,
+          "line": 39,
+          "col": 14
+        },
+        {
+          "name": "%_Expr",
+          "isInitial": false,
+          "line": 40,
+          "col": 14
+        },
+        {
+          "name": "%_ExprPrima",
+          "isInitial": false,
+          "line": 41,
+          "col": 14
+        },
+        {
+          "name": "%_Term",
+          "isInitial": false,
+          "line": 42,
+          "col": 14
+        },
+        {
+          "name": "%_TermPrima",
+          "isInitial": false,
+          "line": 43,
+          "col": 14
+        },
+        {
+          "name": "%_Factor",
+          "isInitial": false,
+          "line": 44,
+          "col": 14
+        }
+      ],
+      "initialSymbol": "%_Programa",
+      "productions": [
+        {
+          "head": "%_Programa",
+          "alternatives": [
+            [
+              {
+                "name": "%_ListaSentencias",
+                "type": "nonTerminal",
+                "line": 49,
+                "col": 16
+              }
+            ]
+          ],
+          "line": 49,
+          "col": 2
+        },
+        {
+          "head": "%_ListaSentencias",
+          "alternatives": [
+            [
+              {
+                "name": "%_Sentencia",
+                "type": "nonTerminal",
+                "line": 52,
+                "col": 23
+              },
+              {
+                "name": "%_ListaSentencias",
+                "type": "nonTerminal",
+                "line": 52,
+                "col": 35
+              }
+            ]
+          ],
+          "line": 52,
+          "col": 2
+        },
+        {
+          "head": "%_ListaSentencias",
+          "alternatives": [
+            []
+          ],
+          "line": 53,
+          "col": 2
+        },
+        {
+          "head": "%_Sentencia",
+          "alternatives": [
+            [
+              {
+                "name": "$_Var",
+                "type": "terminal",
+                "line": 56,
+                "col": 17
+              },
+              {
+                "name": "$_ID",
+                "type": "terminal",
+                "line": 56,
+                "col": 23
+              },
+              {
+                "name": "$_Igual",
+                "type": "terminal",
+                "line": 56,
+                "col": 28
+              },
+              {
+                "name": "%_Expr",
+                "type": "nonTerminal",
+                "line": 56,
+                "col": 36
+              },
+              {
+                "name": "$_PuntoComa",
+                "type": "terminal",
+                "line": 56,
+                "col": 43
+              }
+            ],
+            [
+              {
+                "name": "$_ID",
+                "type": "terminal",
+                "line": 57,
+                "col": 17
+              },
+              {
+                "name": "$_Igual",
+                "type": "terminal",
+                "line": 57,
+                "col": 22
+              },
+              {
+                "name": "%_Expr",
+                "type": "nonTerminal",
+                "line": 57,
+                "col": 30
+              },
+              {
+                "name": "$_PuntoComa",
+                "type": "terminal",
+                "line": 57,
+                "col": 37
+              }
+            ],
+            [
+              {
+                "name": "$_If",
+                "type": "terminal",
+                "line": 58,
+                "col": 17
+              },
+              {
+                "name": "$_ParAbre",
+                "type": "terminal",
+                "line": 58,
+                "col": 22
+              },
+              {
+                "name": "%_Expr",
+                "type": "nonTerminal",
+                "line": 58,
+                "col": 32
+              },
+              {
+                "name": "$_ParCierra",
+                "type": "terminal",
+                "line": 58,
+                "col": 39
+              },
+              {
+                "name": "$_LlaveAbre",
+                "type": "terminal",
+                "line": 58,
+                "col": 51
+              },
+              {
+                "name": "%_ListaSentencias",
+                "type": "nonTerminal",
+                "line": 58,
+                "col": 63
+              },
+              {
+                "name": "$_LlaveCierra",
+                "type": "terminal",
+                "line": 58,
+                "col": 81
+              }
+            ],
+            [
+              {
+                "name": "$_While",
+                "type": "terminal",
+                "line": 59,
+                "col": 17
+              },
+              {
+                "name": "$_ParAbre",
+                "type": "terminal",
+                "line": 59,
+                "col": 25
+              },
+              {
+                "name": "%_Expr",
+                "type": "nonTerminal",
+                "line": 59,
+                "col": 35
+              },
+              {
+                "name": "$_ParCierra",
+                "type": "terminal",
+                "line": 59,
+                "col": 42
+              },
+              {
+                "name": "$_LlaveAbre",
+                "type": "terminal",
+                "line": 59,
+                "col": 54
+              },
+              {
+                "name": "%_ListaSentencias",
+                "type": "nonTerminal",
+                "line": 59,
+                "col": 66
+              },
+              {
+                "name": "$_LlaveCierra",
+                "type": "terminal",
+                "line": 59,
+                "col": 84
+              }
+            ]
+          ],
+          "line": 56,
+          "col": 2
+        },
+        {
+          "head": "%_Expr",
+          "alternatives": [
+            [
+              {
+                "name": "%_Term",
+                "type": "nonTerminal",
+                "line": 62,
+                "col": 12
+              },
+              {
+                "name": "%_ExprPrima",
+                "type": "nonTerminal",
+                "line": 62,
+                "col": 19
+              }
+            ]
+          ],
+          "line": 62,
+          "col": 2
+        },
+        {
+          "head": "%_ExprPrima",
+          "alternatives": [
+            [
+              {
+                "name": "$_Mas",
+                "type": "terminal",
+                "line": 64,
+                "col": 17
+              },
+              {
+                "name": "%_Term",
+                "type": "nonTerminal",
+                "line": 64,
+                "col": 23
+              },
+              {
+                "name": "%_ExprPrima",
+                "type": "nonTerminal",
+                "line": 64,
+                "col": 30
+              }
+            ],
+            [
+              {
+                "name": "$_Menos",
+                "type": "terminal",
+                "line": 65,
+                "col": 17
+              },
+              {
+                "name": "%_Term",
+                "type": "nonTerminal",
+                "line": 65,
+                "col": 25
+              },
+              {
+                "name": "%_ExprPrima",
+                "type": "nonTerminal",
+                "line": 65,
+                "col": 32
+              }
+            ]
+          ],
+          "line": 64,
+          "col": 2
+        },
+        {
+          "head": "%_ExprPrima",
+          "alternatives": [
+            []
+          ],
+          "line": 66,
+          "col": 2
+        },
+        {
+          "head": "%_Term",
+          "alternatives": [
+            [
+              {
+                "name": "%_Factor",
+                "type": "nonTerminal",
+                "line": 68,
+                "col": 12
+              },
+              {
+                "name": "%_TermPrima",
+                "type": "nonTerminal",
+                "line": 68,
+                "col": 21
+              }
+            ]
+          ],
+          "line": 68,
+          "col": 2
+        },
+        {
+          "head": "%_TermPrima",
+          "alternatives": [
+            [
+              {
+                "name": "$_Multiplicacion",
+                "type": "terminal",
+                "line": 70,
+                "col": 17
+              },
+              {
+                "name": "%_Factor",
+                "type": "nonTerminal",
+                "line": 70,
+                "col": 34
+              },
+              {
+                "name": "%_TermPrima",
+                "type": "nonTerminal",
+                "line": 70,
+                "col": 43
+              }
+            ],
+            [
+              {
+                "name": "$_Division",
+                "type": "terminal",
+                "line": 71,
+                "col": 17
+              },
+              {
+                "name": "%_Factor",
+                "type": "nonTerminal",
+                "line": 71,
+                "col": 28
+              },
+              {
+                "name": "%_TermPrima",
+                "type": "nonTerminal",
+                "line": 71,
+                "col": 37
+              }
+            ]
+          ],
+          "line": 70,
+          "col": 2
+        },
+        {
+          "head": "%_TermPrima",
+          "alternatives": [
+            []
+          ],
+          "line": 72,
+          "col": 2
+        },
+        {
+          "head": "%_Factor",
+          "alternatives": [
+            [
+              {
+                "name": "$_ParAbre",
+                "type": "terminal",
+                "line": 74,
+                "col": 14
+              },
+              {
+                "name": "%_Expr",
+                "type": "nonTerminal",
+                "line": 74,
+                "col": 24
+              },
+              {
+                "name": "$_ParCierra",
+                "type": "terminal",
+                "line": 74,
+                "col": 31
+              }
+            ],
+            [
+              {
+                "name": "$_ID",
+                "type": "terminal",
+                "line": 75,
+                "col": 14
+              }
+            ],
+            [
+              {
+                "name": "$_Num",
+                "type": "terminal",
+                "line": 76,
+                "col": 14
+              }
+            ]
+          ],
+          "line": 74,
+          "col": 2
+        }
+      ],
+      "errors": []
+    },
+    "terminalPatterns": {
+      "$_Mas": "\\+",
+      "$_Menos": "-",
+      "$_Multiplicacion": "\\*",
+      "$_Division": "/",
+      "$_Igual": "=",
+      "$_PuntoComa": ";",
+      "$_ParAbre": "\\(",
+      "$_ParCierra": "\\)",
+      "$_LlaveAbre": "\\{",
+      "$_LlaveCierra": "\\}",
+      "$_Var": "var",
+      "$_If": "if",
+      "$_While": "while",
+      "$_ID": "(([a-zA-Z]))+(([0-9]))*",
+      "$_Num": "(([0-9]))+(([0-9]))?"
+    },
+    "firstSets": {
+      "%_Programa": [
+        "$_ID",
+        "$_If",
+        "$_Var",
+        "$_While",
+        "ε"
+      ],
+      "%_ListaSentencias": [
+        "$_ID",
+        "$_If",
+        "$_Var",
+        "$_While",
+        "ε"
+      ],
+      "%_Sentencia": [
+        "$_ID",
+        "$_If",
+        "$_Var",
+        "$_While"
+      ],
+      "%_Expr": [
+        "$_ID",
+        "$_Num",
+        "$_ParAbre"
+      ],
+      "%_ExprPrima": [
+        "$_Mas",
+        "$_Menos",
+        "ε"
+      ],
+      "%_Term": [
+        "$_ID",
+        "$_Num",
+        "$_ParAbre"
+      ],
+      "%_TermPrima": [
+        "$_Division",
+        "$_Multiplicacion",
+        "ε"
+      ],
+      "%_Factor": [
+        "$_ID",
+        "$_Num",
+        "$_ParAbre"
+      ],
+      "$_Mas": [
+        "$_Mas"
+      ],
+      "$_Menos": [
+        "$_Menos"
+      ],
+      "$_Multiplicacion": [
+        "$_Multiplicacion"
+      ],
+      "$_Division": [
+        "$_Division"
+      ],
+      "$_Igual": [
+        "$_Igual"
+      ],
+      "$_PuntoComa": [
+        "$_PuntoComa"
+      ],
+      "$_ParAbre": [
+        "$_ParAbre"
+      ],
+      "$_ParCierra": [
+        "$_ParCierra"
+      ],
+      "$_LlaveAbre": [
+        "$_LlaveAbre"
+      ],
+      "$_LlaveCierra": [
+        "$_LlaveCierra"
+      ],
+      "$_Var": [
+        "$_Var"
+      ],
+      "$_If": [
+        "$_If"
+      ],
+      "$_While": [
+        "$_While"
+      ],
+      "$_Letra": [
+        "$_Letra"
+      ],
+      "$_Digito": [
+        "$_Digito"
+      ],
+      "$_ID": [
+        "$_ID"
+      ],
+      "$_Num": [
+        "$_Num"
+      ],
+      "ε": [
+        "ε"
+      ]
+    },
+    "followSets": {
+      "%_Programa": [
+        "$"
+      ],
+      "%_ListaSentencias": [
+        "$",
+        "$_LlaveCierra"
+      ],
+      "%_Sentencia": [
+        "$",
+        "$_ID",
+        "$_If",
+        "$_LlaveCierra",
+        "$_Var",
+        "$_While"
+      ],
+      "%_Expr": [
+        "$_ParCierra",
+        "$_PuntoComa"
+      ],
+      "%_ExprPrima": [
+        "$_ParCierra",
+        "$_PuntoComa"
+      ],
+      "%_Term": [
+        "$_Mas",
+        "$_Menos",
+        "$_ParCierra",
+        "$_PuntoComa"
+      ],
+      "%_TermPrima": [
+        "$_Mas",
+        "$_Menos",
+        "$_ParCierra",
+        "$_PuntoComa"
+      ],
+      "%_Factor": [
+        "$_Division",
+        "$_Mas",
+        "$_Menos",
+        "$_Multiplicacion",
+        "$_ParCierra",
+        "$_PuntoComa"
+      ]
+    },
+    "parseTable": {
+      "%_Programa": {
+        "$_Var": {
+          "head": "%_Programa",
+          "body": [
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 49,
+              "col": 16
+            }
+          ],
+          "altIndex": 0,
+          "line": 49,
+          "col": 2
+        },
+        "$_ID": {
+          "head": "%_Programa",
+          "body": [
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 49,
+              "col": 16
+            }
+          ],
+          "altIndex": 0,
+          "line": 49,
+          "col": 2
+        },
+        "$_If": {
+          "head": "%_Programa",
+          "body": [
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 49,
+              "col": 16
+            }
+          ],
+          "altIndex": 0,
+          "line": 49,
+          "col": 2
+        },
+        "$_While": {
+          "head": "%_Programa",
+          "body": [
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 49,
+              "col": 16
+            }
+          ],
+          "altIndex": 0,
+          "line": 49,
+          "col": 2
+        },
+        "$": {
+          "head": "%_Programa",
+          "body": [
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 49,
+              "col": 16
+            }
+          ],
+          "altIndex": 0,
+          "line": 49,
+          "col": 2
+        }
+      },
+      "%_ListaSentencias": {
+        "$_Var": {
+          "head": "%_ListaSentencias",
+          "body": [
+            {
+              "name": "%_Sentencia",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 23
+            },
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 35
+            }
+          ],
+          "altIndex": 0,
+          "line": 52,
+          "col": 2
+        },
+        "$_ID": {
+          "head": "%_ListaSentencias",
+          "body": [
+            {
+              "name": "%_Sentencia",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 23
+            },
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 35
+            }
+          ],
+          "altIndex": 0,
+          "line": 52,
+          "col": 2
+        },
+        "$_If": {
+          "head": "%_ListaSentencias",
+          "body": [
+            {
+              "name": "%_Sentencia",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 23
+            },
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 35
+            }
+          ],
+          "altIndex": 0,
+          "line": 52,
+          "col": 2
+        },
+        "$_While": {
+          "head": "%_ListaSentencias",
+          "body": [
+            {
+              "name": "%_Sentencia",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 23
+            },
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 52,
+              "col": 35
+            }
+          ],
+          "altIndex": 0,
+          "line": 52,
+          "col": 2
+        },
+        "$": {
+          "head": "%_ListaSentencias",
+          "body": [],
+          "altIndex": 0,
+          "line": 53,
+          "col": 2
+        },
+        "$_LlaveCierra": {
+          "head": "%_ListaSentencias",
+          "body": [],
+          "altIndex": 0,
+          "line": 53,
+          "col": 2
+        }
+      },
+      "%_Sentencia": {
+        "$_Var": {
+          "head": "%_Sentencia",
+          "body": [
+            {
+              "name": "$_Var",
+              "type": "terminal",
+              "line": 56,
+              "col": 17
+            },
+            {
+              "name": "$_ID",
+              "type": "terminal",
+              "line": 56,
+              "col": 23
+            },
+            {
+              "name": "$_Igual",
+              "type": "terminal",
+              "line": 56,
+              "col": 28
+            },
+            {
+              "name": "%_Expr",
+              "type": "nonTerminal",
+              "line": 56,
+              "col": 36
+            },
+            {
+              "name": "$_PuntoComa",
+              "type": "terminal",
+              "line": 56,
+              "col": 43
+            }
+          ],
+          "altIndex": 0,
+          "line": 56,
+          "col": 2
+        },
+        "$_ID": {
+          "head": "%_Sentencia",
+          "body": [
+            {
+              "name": "$_ID",
+              "type": "terminal",
+              "line": 57,
+              "col": 17
+            },
+            {
+              "name": "$_Igual",
+              "type": "terminal",
+              "line": 57,
+              "col": 22
+            },
+            {
+              "name": "%_Expr",
+              "type": "nonTerminal",
+              "line": 57,
+              "col": 30
+            },
+            {
+              "name": "$_PuntoComa",
+              "type": "terminal",
+              "line": 57,
+              "col": 37
+            }
+          ],
+          "altIndex": 1,
+          "line": 56,
+          "col": 2
+        },
+        "$_If": {
+          "head": "%_Sentencia",
+          "body": [
+            {
+              "name": "$_If",
+              "type": "terminal",
+              "line": 58,
+              "col": 17
+            },
+            {
+              "name": "$_ParAbre",
+              "type": "terminal",
+              "line": 58,
+              "col": 22
+            },
+            {
+              "name": "%_Expr",
+              "type": "nonTerminal",
+              "line": 58,
+              "col": 32
+            },
+            {
+              "name": "$_ParCierra",
+              "type": "terminal",
+              "line": 58,
+              "col": 39
+            },
+            {
+              "name": "$_LlaveAbre",
+              "type": "terminal",
+              "line": 58,
+              "col": 51
+            },
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 58,
+              "col": 63
+            },
+            {
+              "name": "$_LlaveCierra",
+              "type": "terminal",
+              "line": 58,
+              "col": 81
+            }
+          ],
+          "altIndex": 2,
+          "line": 56,
+          "col": 2
+        },
+        "$_While": {
+          "head": "%_Sentencia",
+          "body": [
+            {
+              "name": "$_While",
+              "type": "terminal",
+              "line": 59,
+              "col": 17
+            },
+            {
+              "name": "$_ParAbre",
+              "type": "terminal",
+              "line": 59,
+              "col": 25
+            },
+            {
+              "name": "%_Expr",
+              "type": "nonTerminal",
+              "line": 59,
+              "col": 35
+            },
+            {
+              "name": "$_ParCierra",
+              "type": "terminal",
+              "line": 59,
+              "col": 42
+            },
+            {
+              "name": "$_LlaveAbre",
+              "type": "terminal",
+              "line": 59,
+              "col": 54
+            },
+            {
+              "name": "%_ListaSentencias",
+              "type": "nonTerminal",
+              "line": 59,
+              "col": 66
+            },
+            {
+              "name": "$_LlaveCierra",
+              "type": "terminal",
+              "line": 59,
+              "col": 84
+            }
+          ],
+          "altIndex": 3,
+          "line": 56,
+          "col": 2
+        }
+      },
+      "%_Expr": {
+        "$_ParAbre": {
+          "head": "%_Expr",
+          "body": [
+            {
+              "name": "%_Term",
+              "type": "nonTerminal",
+              "line": 62,
+              "col": 12
+            },
+            {
+              "name": "%_ExprPrima",
+              "type": "nonTerminal",
+              "line": 62,
+              "col": 19
+            }
+          ],
+          "altIndex": 0,
+          "line": 62,
+          "col": 2
+        },
+        "$_ID": {
+          "head": "%_Expr",
+          "body": [
+            {
+              "name": "%_Term",
+              "type": "nonTerminal",
+              "line": 62,
+              "col": 12
+            },
+            {
+              "name": "%_ExprPrima",
+              "type": "nonTerminal",
+              "line": 62,
+              "col": 19
+            }
+          ],
+          "altIndex": 0,
+          "line": 62,
+          "col": 2
+        },
+        "$_Num": {
+          "head": "%_Expr",
+          "body": [
+            {
+              "name": "%_Term",
+              "type": "nonTerminal",
+              "line": 62,
+              "col": 12
+            },
+            {
+              "name": "%_ExprPrima",
+              "type": "nonTerminal",
+              "line": 62,
+              "col": 19
+            }
+          ],
+          "altIndex": 0,
+          "line": 62,
+          "col": 2
+        }
+      },
+      "%_ExprPrima": {
+        "$_Mas": {
+          "head": "%_ExprPrima",
+          "body": [
+            {
+              "name": "$_Mas",
+              "type": "terminal",
+              "line": 64,
+              "col": 17
+            },
+            {
+              "name": "%_Term",
+              "type": "nonTerminal",
+              "line": 64,
+              "col": 23
+            },
+            {
+              "name": "%_ExprPrima",
+              "type": "nonTerminal",
+              "line": 64,
+              "col": 30
+            }
+          ],
+          "altIndex": 0,
+          "line": 64,
+          "col": 2
+        },
+        "$_Menos": {
+          "head": "%_ExprPrima",
+          "body": [
+            {
+              "name": "$_Menos",
+              "type": "terminal",
+              "line": 65,
+              "col": 17
+            },
+            {
+              "name": "%_Term",
+              "type": "nonTerminal",
+              "line": 65,
+              "col": 25
+            },
+            {
+              "name": "%_ExprPrima",
+              "type": "nonTerminal",
+              "line": 65,
+              "col": 32
+            }
+          ],
+          "altIndex": 1,
+          "line": 64,
+          "col": 2
+        },
+        "$_PuntoComa": {
+          "head": "%_ExprPrima",
+          "body": [],
+          "altIndex": 0,
+          "line": 66,
+          "col": 2
+        },
+        "$_ParCierra": {
+          "head": "%_ExprPrima",
+          "body": [],
+          "altIndex": 0,
+          "line": 66,
+          "col": 2
+        }
+      },
+      "%_Term": {
+        "$_ParAbre": {
+          "head": "%_Term",
+          "body": [
+            {
+              "name": "%_Factor",
+              "type": "nonTerminal",
+              "line": 68,
+              "col": 12
+            },
+            {
+              "name": "%_TermPrima",
+              "type": "nonTerminal",
+              "line": 68,
+              "col": 21
+            }
+          ],
+          "altIndex": 0,
+          "line": 68,
+          "col": 2
+        },
+        "$_ID": {
+          "head": "%_Term",
+          "body": [
+            {
+              "name": "%_Factor",
+              "type": "nonTerminal",
+              "line": 68,
+              "col": 12
+            },
+            {
+              "name": "%_TermPrima",
+              "type": "nonTerminal",
+              "line": 68,
+              "col": 21
+            }
+          ],
+          "altIndex": 0,
+          "line": 68,
+          "col": 2
+        },
+        "$_Num": {
+          "head": "%_Term",
+          "body": [
+            {
+              "name": "%_Factor",
+              "type": "nonTerminal",
+              "line": 68,
+              "col": 12
+            },
+            {
+              "name": "%_TermPrima",
+              "type": "nonTerminal",
+              "line": 68,
+              "col": 21
+            }
+          ],
+          "altIndex": 0,
+          "line": 68,
+          "col": 2
+        }
+      },
+      "%_TermPrima": {
+        "$_Multiplicacion": {
+          "head": "%_TermPrima",
+          "body": [
+            {
+              "name": "$_Multiplicacion",
+              "type": "terminal",
+              "line": 70,
+              "col": 17
+            },
+            {
+              "name": "%_Factor",
+              "type": "nonTerminal",
+              "line": 70,
+              "col": 34
+            },
+            {
+              "name": "%_TermPrima",
+              "type": "nonTerminal",
+              "line": 70,
+              "col": 43
+            }
+          ],
+          "altIndex": 0,
+          "line": 70,
+          "col": 2
+        },
+        "$_Division": {
+          "head": "%_TermPrima",
+          "body": [
+            {
+              "name": "$_Division",
+              "type": "terminal",
+              "line": 71,
+              "col": 17
+            },
+            {
+              "name": "%_Factor",
+              "type": "nonTerminal",
+              "line": 71,
+              "col": 28
+            },
+            {
+              "name": "%_TermPrima",
+              "type": "nonTerminal",
+              "line": 71,
+              "col": 37
+            }
+          ],
+          "altIndex": 1,
+          "line": 70,
+          "col": 2
+        },
+        "$_Mas": {
+          "head": "%_TermPrima",
+          "body": [],
+          "altIndex": 0,
+          "line": 72,
+          "col": 2
+        },
+        "$_Menos": {
+          "head": "%_TermPrima",
+          "body": [],
+          "altIndex": 0,
+          "line": 72,
+          "col": 2
+        },
+        "$_PuntoComa": {
+          "head": "%_TermPrima",
+          "body": [],
+          "altIndex": 0,
+          "line": 72,
+          "col": 2
+        },
+        "$_ParCierra": {
+          "head": "%_TermPrima",
+          "body": [],
+          "altIndex": 0,
+          "line": 72,
+          "col": 2
+        }
+      },
+      "%_Factor": {
+        "$_ParAbre": {
+          "head": "%_Factor",
+          "body": [
+            {
+              "name": "$_ParAbre",
+              "type": "terminal",
+              "line": 74,
+              "col": 14
+            },
+            {
+              "name": "%_Expr",
+              "type": "nonTerminal",
+              "line": 74,
+              "col": 24
+            },
+            {
+              "name": "$_ParCierra",
+              "type": "terminal",
+              "line": 74,
+              "col": 31
+            }
+          ],
+          "altIndex": 0,
+          "line": 74,
+          "col": 2
+        },
+        "$_ID": {
+          "head": "%_Factor",
+          "body": [
+            {
+              "name": "$_ID",
+              "type": "terminal",
+              "line": 75,
+              "col": 14
+            }
+          ],
+          "altIndex": 1,
+          "line": 74,
+          "col": 2
+        },
+        "$_Num": {
+          "head": "%_Factor",
+          "body": [
+            {
+              "name": "$_Num",
+              "type": "terminal",
+              "line": 76,
+              "col": 14
+            }
+          ],
+          "altIndex": 2,
+          "line": 74,
+          "col": 2
+        }
+      }
+    },
+    "warnings": [
+      "Terminal \"$_Letra\" se usa solo como macro (no aparece en producciones) y se excluye del tokenizador.",
+      "Terminal \"$_Digito\" se usa solo como macro (no aparece en producciones) y se excluye del tokenizador."
+    ],
+    "createdAt": "2026-04-09T07:04:19.543Z"
   }
 ]
