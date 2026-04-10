@@ -116,6 +116,50 @@ function validateSemantics(ast) {
 }
 
 /**
+ * Resuelve referencias en los AST estructurados de los terminales.
+ * Sustituye nodos {op:'ref', name:'$_X'} por el AST del terminal referenciado.
+ */
+function resolveAstReferences(terminals) {
+    // Mapa nombre -> ast original
+    const rawAstMap = {};
+    for (const t of terminals) {
+        rawAstMap[t.name] = t.ast || null;
+    }
+
+    // Mapa de resultados ya resueltos (memoización)
+    const resolved = {};
+
+    function resolveNode(node) {
+        if (!node) return null;
+        switch (node.op) {
+            case 'ref': {
+                const name = node.name;
+                if (resolved[name] !== undefined) return resolved[name];
+                // Marcar temporalmente para detectar ciclos (no deberían existir
+                // después de que resolveTerminalReferences los valida)
+                resolved[name] = null;
+                const r = resolveNode(rawAstMap[name] || null);
+                resolved[name] = r;
+                return r;
+            }
+            case 'concat': return { op:'concat', left:resolveNode(node.left),  right:resolveNode(node.right) };
+            case 'star':   return { op:'star',   sub:resolveNode(node.sub) };
+            case 'plus':   return { op:'plus',   sub:resolveNode(node.sub) };
+            case 'opt':    return { op:'opt',    sub:resolveNode(node.sub) };
+            default:       return node; // lit, range — sin sub-nodos
+        }
+    }
+
+    // Resolver todos los terminales
+    for (const t of terminals) {
+        if (resolved[t.name] === undefined) {
+            resolved[t.name] = resolveNode(t.ast || null);
+        }
+    }
+    return resolved;
+}
+
+/**
  * Los terminales de tipo 'concat' o 'reference' pueden contener $_Nombre
  * en su patrón. Esta etapa los sustituye por el patrón real del terminal
  * referenciado, resolviendo en orden topológico.
@@ -512,11 +556,12 @@ function generate(ast, name) {
         return result;
     }
 
-    // Etapa 2: Resolver referencias de terminales
+    // Etapa 2: Resolver referencias de terminales (patrones regex y ASTs)
     const terminalsCopy = ast.terminals.map(t => ({ ...t }));
-    let terminalPatterns;
+    let terminalPatterns, terminalAsts;
     try {
         terminalPatterns = resolveTerminalReferences(terminalsCopy);
+        terminalAsts     = resolveAstReferences(ast.terminals);
     } catch (e) {
         result.errors = [{ type: 'semantic', message: e.message, line: null, col: null }];
         result.type = 'semantic';
@@ -537,8 +582,12 @@ function generate(ast, name) {
         Object.keys(terminalPatterns).filter(n => !terminalsInProductions.has(n))
     );
     const publicTerminalPatterns = {};
+    const publicTerminalAsts = {};
     for (const [name, pat] of Object.entries(terminalPatterns)) {
-        if (!macroTerminals.has(name)) publicTerminalPatterns[name] = pat;
+        if (!macroTerminals.has(name)) {
+            publicTerminalPatterns[name] = pat;
+            publicTerminalAsts[name]     = terminalAsts[name] || null;
+        }
     }
     if (macroTerminals.size > 0) {
         const macroWarnings = [...macroTerminals].map(n =>
@@ -581,13 +630,14 @@ function generate(ast, name) {
         ok: true,
         entry: {
             name,
-            grammar:         ast,
+            grammar:          ast,
             terminalPatterns: publicTerminalPatterns,
-            firstSets:       setsToArrays(firstSets),
-            followSets:      setsToArrays(followSets),
-            parseTable:      table,
+            terminalAsts:     publicTerminalAsts,
+            firstSets:        setsToArrays(firstSets),
+            followSets:       setsToArrays(followSets),
+            parseTable:       table,
             warnings,
-            createdAt:       new Date().toISOString()
+            createdAt:        new Date().toISOString()
         }
     };
 }

@@ -37,11 +37,21 @@
 
 .tokens-section { display: flex; flex-direction: column; gap: 8px; }
 .section-title { font-size: 12px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: .4px; margin: 0; }
-.tokens-row { display: flex; flex-wrap: wrap; gap: 6px; }
-.token { display: flex; flex-direction: column; align-items: center; background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 6px; padding: 4px 8px; min-width: 40px; }
-.token.eof { background: #f7fafc; border-color: #e2e8f0; }
-.token-lexeme { font-family: monospace; font-size: 13px; font-weight: 600; color: #2b6cb0; }
-.token-name   { font-size: 10px; color: #718096; }
+.tokens-header { display: flex; align-items: center; justify-content: space-between; }
+.tokens-count  { font-size: 11px; color: #a0aec0; }
+
+.tokens-table-wrap { max-height: 260px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+.tokens-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tokens-table thead { position: sticky; top: 0; z-index: 1; }
+.tokens-table th { background: #edf2f7; padding: 6px 10px; text-align: left; font-weight: 600; color: #4a5568; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+.tokens-table td { padding: 5px 10px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+.tokens-table tr:last-child td { border-bottom: none; }
+.tokens-table tbody tr:hover { background: #f7fafc; }
+
+.col-num  { color: #a0aec0; text-align: right; width: 32px; font-variant-numeric: tabular-nums; }
+.col-pos  { color: #a0aec0; text-align: center; width: 44px; font-variant-numeric: tabular-nums; font-family: 'Courier New', monospace; font-size: 11px; }
+.tok-name   { color: #2b6cb0; background: #ebf8ff; padding: 1px 6px; border-radius: 3px; font-size: 11px; white-space: nowrap; }
+.tok-lexeme { color: #276749; background: #f0fff4; padding: 1px 6px; border-radius: 3px; font-size: 11px; }
 
 .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; }
 .alert-info { background: #ebf8ff; border: 1px solid #bee3f8; color: #2c5282; }

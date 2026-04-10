@@ -65,8 +65,8 @@
 /lex
 
 /* -------Asociación y Precedencia de Operadores------- */
-%right QUESTION STAR PLUS
 %left  CONCAT
+%right QUESTION STAR PLUS
 
 %start program
 
@@ -142,7 +142,7 @@ terminal_decl_list
 /* Declaración válida */
 terminal_decl
     : TERMINAL_KW TERMINAL_NAME ARROW regex_expr SEMICOLON
-        { $$ = { name:$2, pattern:$4.pattern, patternType:$4.type, line:@2.first_line, col:@2.first_column }; }
+        { $$ = { name:$2, pattern:$4.pattern, patternType:$4.type, ast:$4.ast, line:@2.first_line, col:@2.first_column }; }
     /* Recuperación: cualquier error en la declaración, sincronizar en ; */
     | TERMINAL_KW error SEMICOLON
         {
@@ -172,28 +172,28 @@ terminal_decl
 /* -- Expresiones regulares -- */
 regex_expr
     : regex_expr STAR							/* e*   */
-        { $$ = { pattern:'('+$1.pattern+')*', type:'kleene' }; }
+        { $$ = { pattern:'('+$1.pattern+')*', type:'kleene',   ast:{op:'star', sub:$1.ast} }; }
     | regex_expr PLUS							/* e+   */
-        { $$ = { pattern:'('+$1.pattern+')+', type:'positive' }; }
+        { $$ = { pattern:'('+$1.pattern+')+', type:'positive', ast:{op:'plus', sub:$1.ast} }; }
     | regex_expr QUESTION						/* e?   */
-        { $$ = { pattern:'('+$1.pattern+')?', type:'optional' }; }
+        { $$ = { pattern:'('+$1.pattern+')?', type:'optional', ast:{op:'opt',  sub:$1.ast} }; }
     | LPAREN regex_expr RPAREN regex_expr   %prec CONCAT		/* (e1)(e2) */
-        { $$ = { pattern:$2.pattern+$4.pattern, type:'concat' }; }
+        { $$ = { pattern:$2.pattern+$4.pattern, type:'concat', ast:{op:'concat', left:$2.ast, right:$4.ast} }; }
     | LPAREN regex_expr RPAREN						/* (e)  */
-        { $$ = { pattern:$2.pattern, type:'group' }; }
+        { $$ = { pattern:$2.pattern, type:'group', ast:$2.ast }; }
     | LITERAL								/* 'a'  */
         {
             var raw = yytext.slice(1,-1);
             var esc = raw.replace(/[-[\]{}()*+?.,\\^$|#\s]/g,'\\$&');
             esc = esc.replace(/\\-/g, '-')
-            $$ = { pattern:esc, type:'literal' };
+            $$ = { pattern:esc, type:'literal', ast:{op:'lit', value:raw} };
         }
     | RANGE_ALPHA					/* [aA-zZ] */
-        { $$ = { pattern:'[a-zA-Z]', type:'range' }; }
+        { $$ = { pattern:'[a-zA-Z]', type:'range', ast:{op:'range', ranges:[{from:65,to:90},{from:97,to:122}]} }; }
     | RANGE_DIGIT					/* [0-9]   */
-        { $$ = { pattern:'[0-9]', type:'range' }; }
+        { $$ = { pattern:'[0-9]', type:'range', ast:{op:'range', ranges:[{from:48,to:57}]} }; }
     | TERMINAL_NAME					/* referencia */
-        { $$ = { pattern:yytext, type:'reference' }; }
+        { $$ = { pattern:yytext, type:'reference', ast:{op:'ref', name:yytext} }; }
     ;
 
 /* -- Bloque Syntax -- */

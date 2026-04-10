@@ -1,5 +1,6 @@
 <div class="editor-page">
 
+  <!-- Panel izquierdo: editor -->
   <div class="panel">
     <div class="panel-header">
       <h2>Editor Wison</h2>
@@ -56,6 +57,7 @@
     <app-error-panel [errors]="errors()" [warnings]="warnings()" />
   </div>
 
+  <!-- Panel derecho: lista de analizadores -->
   <div class="panel">
     <div class="panel-header">
       <h2>Analizadores creados</h2>
@@ -71,13 +73,20 @@
             <div class="analyzer-info">
               <span class="analyzer-name">{{ a.name }}</span>
               <span class="analyzer-meta">
-                {{ a.terminalCount }} terminales · {{ a.ntCount }} no terminales · inicial: {{ a.initialSymbol }}
+                {{ a.terminalCount }} terminales &middot;
+                {{ a.ntCount }} no terminales &middot;
+                inicial: <code>{{ a.initialSymbol }}</code>
               </span>
               @if (a.warnings.length > 0) {
                 <span class="analyzer-warn">&#9888; {{ a.warnings.length }} advertencia(s)</span>
               }
             </div>
-            <button class="btn btn-danger btn-sm" (click)="onDelete(a.name)">Eliminar</button>
+            <div class="analyzer-actions">
+              <button class="btn btn-ghost btn-sm" (click)="openDetail(a.name)" title="Ver detalles">
+                &#128269;
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="onDelete(a.name)">Eliminar</button>
+            </div>
           </li>
         }
       </ul>
@@ -85,3 +94,92 @@
   </div>
 
 </div>
+
+<!-- Modal de detalles -->
+@if (modalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3 class="modal-title">{{ modalName() }}</h3>
+        <button class="modal-close" (click)="closeModal()">&#x2715;</button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (detailLoading()) {
+          <p class="detail-loading">Cargando detalles...</p>
+        }
+
+        @if (detailData(); as d) {
+
+          @if (d.warnings?.length > 0) {
+            <div class="detail-section">
+              <h4 class="detail-title">&#9888; Advertencias</h4>
+              <ul class="warn-list">
+                @for (w of d.warnings; track $index) { <li>{{ w }}</li> }
+              </ul>
+            </div>
+          }
+
+          <!-- Terminales -->
+          <div class="detail-section">
+            <h4 class="detail-title">Terminales ({{ d.grammar.terminals.length }})</h4>
+            <div class="detail-table-wrap">
+              <table class="detail-table">
+                <thead><tr><th>Nombre</th><th>Patrón</th></tr></thead>
+                <tbody>
+                  @for (t of d.grammar.terminals; track t.name) {
+                    <tr>
+                      <td><code class="token-name">{{ t.name }}</code></td>
+                      <td><code class="token-pattern">{{ d.terminalPatterns[t.name] ?? t.pattern }}</code></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- No terminales -->
+          <div class="detail-section">
+            <h4 class="detail-title">No terminales ({{ d.grammar.nonTerminals.length }})</h4>
+            <div class="detail-table-wrap">
+              <table class="detail-table">
+                <thead>
+                  <tr><th>Nombre</th><th>FIRST</th><th>FOLLOW</th></tr>
+                </thead>
+                <tbody>
+                  @for (nt of d.grammar.nonTerminals; track nt.name) {
+                    <tr>
+                      <td>
+                        <code class="nt-name">{{ nt.name }}</code>
+                        @if (nt.name === d.grammar.initialSymbol) {
+                          <span class="badge-initial">inicial</span>
+                        }
+                      </td>
+                      <td class="set-cell">{{ formatSet(d.firstSets[nt.name] ?? []) }}</td>
+                      <td class="set-cell">{{ formatSet(d.followSets[nt.name] ?? []) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Producciones -->
+          <div class="detail-section">
+            <h4 class="detail-title">Producciones ({{ d.grammar.productions.length }})</h4>
+            <div class="prod-list-wrap">
+              <ul class="prod-list">
+                @for (p of d.grammar.productions; track $index) {
+                  <li><code>{{ formatProduction(p) }}</code></li>
+                }
+              </ul>
+            </div>
+          </div>
+
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WisonService } from '../../services/wison';
 import { AnalyzerService } from '../../services/analyzer';
@@ -23,13 +23,55 @@ export class Editor {
 
   analyzers = this.analyzerSvc.analyzers;
 
-  // Números de línea calculados desde el código
+  // Modal de detalles
+  modalOpen     = signal(false);
+  modalName     = signal<string | null>(null);
+  detailLoading = signal(false);
+  detailData    = signal<any>(null);
+  private detailCache = new Map<string, any>();
+
   lineNumbers_ = computed(() => {
     const count = (this.code().split('\n').length) || 1;
     return Array.from({ length: count }, (_, i) => i + 1);
   });
 
-  // Sincroniza el scroll del textarea con el div de números de línea
+  formatProduction(prod: any): string {
+    const alts = prod.alternatives.map((alt: any[]) =>
+      alt.length === 0 ? 'ε' : alt.map((s: any) => s.name).join(' ')
+    );
+    return `${prod.head}  <=  ${alts.join('  |  ')}`;
+  }
+
+  formatSet(set: string[]): string {
+    return set?.length ? set.join(', ') : '∅';
+  }
+
+  openDetail(name: string): void {
+    this.modalName.set(name);
+    this.modalOpen.set(true);
+
+    if (this.detailCache.has(name)) {
+      this.detailData.set(this.detailCache.get(name));
+      return;
+    }
+    this.detailLoading.set(true);
+    this.detailData.set(null);
+    this.wisonSvc.getAnalyzer(name).subscribe({
+      next: (res: any) => {
+        this.detailCache.set(name, res.entry);
+        this.detailData.set(res.entry);
+        this.detailLoading.set(false);
+      },
+      error: () => this.detailLoading.set(false)
+    });
+  }
+
+  closeModal(): void {
+    this.modalOpen.set(false);
+    this.modalName.set(null);
+    this.detailData.set(null);
+  }
+
   syncScroll(textarea: HTMLTextAreaElement, lineDiv: HTMLElement): void {
     lineDiv.scrollTop = textarea.scrollTop;
   }
@@ -55,6 +97,7 @@ export class Editor {
         this.loading.set(false);
         this.warnings.set(res.warnings || []);
         this.success.set(`Analizador "${res.name}" creado exitosamente.`);
+        this.detailCache.delete(name);
         this.wisonSvc.getAnalyzers().subscribe(list => {
           this.analyzerSvc.setAnalyzers(list.analyzers);
         });
@@ -62,14 +105,10 @@ export class Editor {
       error: (err: any) => {
         this.loading.set(false);
         const body = err.error;
-
         if (body?.errors && Array.isArray(body.errors)) {
-          // Errores con array: léxicos/sintácticos recuperados O semánticos
           const stage = body.stage || 'syntactic';
           const mapped: AppError[] = body.errors.map((e: any) => {
-            if (typeof e === 'string') {
-              return { type: stage as any, message: e, context: this.extractNT(e) };
-            }
+            if (typeof e === 'string') return { type: stage as any, message: e, context: this.extractNT(e) };
             return {
               type:     (e.type || stage) as any,
               message:  e.message,
@@ -82,15 +121,12 @@ export class Editor {
           });
           this.errors.set(mapped);
         } else {
-          // Error único sin array (fallback)
           this.errors.set([{
             type:     (body?.stage || 'syntactic') as any,
             message:  body?.error || err.message,
             line:     body?.line  ?? null,
             col:      body?.col   ?? null,
-            expected: Array.isArray(body?.expected)
-                      ? body.expected.join(' | ')
-                      : body?.expected ?? null,
+            expected: Array.isArray(body?.expected) ? body.expected.join(' | ') : body?.expected ?? null,
             found:    body?.token ?? null
           }]);
         }
@@ -111,9 +147,7 @@ export class Editor {
     const reader = new FileReader();
     reader.onload = () => {
       this.code.set(reader.result as string);
-      if (!this.name()) {
-        this.name.set(file.name.replace(/\.wison$/, ''));
-      }
+      if (!this.name()) this.name.set(file.name.replace(/\.wison$/, ''));
     };
     reader.readAsText(file);
   }
@@ -122,6 +156,8 @@ export class Editor {
     this.wisonSvc.deleteAnalyzer(name).subscribe({
       next: () => {
         this.analyzerSvc.remove(name);
+        this.detailCache.delete(name);
+        if (this.modalName() === name) this.closeModal();
         if (this.success()?.includes(name)) this.success.set(null);
       },
       error: () => {}
@@ -134,5 +170,9 @@ export class Editor {
     this.errors.set([]);
     this.warnings.set([]);
     this.success.set(null);
+  }
+
+  objectEntries(obj: any): [string, any][] {
+    return obj ? Object.entries(obj) : [];
   }
 }

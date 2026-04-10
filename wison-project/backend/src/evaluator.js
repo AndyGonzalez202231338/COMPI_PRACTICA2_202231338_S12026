@@ -37,21 +37,142 @@ class TreeNode {
     }
 }
 
+/* 
+ * Implementa la coincidencia de patrones carácter a carácter
+ * usando un autómata finito no determinista.
+ */
+
 /**
- * tokenize(input, terminalPatterns)
+ * matchNFA(ast, input, pos)
+ *
+ * Dado el AST estructurado de un patrón terminal, intenta hacer
+ * coincidir el patrón con la cadena de entrada a partir de `pos`.
+ *
+ * Retorna un Set<number> con todas las posiciones de fin posibles
+ * (puede haber varias debido a *, +, ?).
+ * El conjunto vacío indica que no hubo coincidencia.
+ *
+ * Operaciones soportadas:
+ *   lit     secuencia literal de caracteres
+ *   range   clase de caracteres por rangos de códigos Unicode
+ *   concat  concatenación (izquierda seguida de derecha)
+ *   star    cero o más repeticiones (BFS para evitar recursión infinita)
+ *   plus    una o más repeticiones
+ *   opt     cero o una repetición
+ */
+function matchNFA(ast, input, pos) {
+    if (!ast) return new Set();
+
+    switch (ast.op) {
+
+        case 'lit': {
+            // Coincidencia carácter a carácter con el valor literal
+            const val = ast.value;
+            let p = pos;
+            for (let i = 0; i < val.length; i++) {
+                if (p >= input.length || input[p] !== val[i]) return new Set();
+                p++;
+            }
+            return new Set([p]);
+        }
+
+        case 'range': {
+            // Un carácter cuyo código Unicode esté dentro de algún rango
+            if (pos >= input.length) return new Set();
+            const code = input.codePointAt(pos);
+            for (const { from, to } of ast.ranges) {
+                if (code >= from && code <= to) return new Set([pos + 1]);
+            }
+            return new Set();
+        }
+
+        case 'concat': {
+            // Izquierda seguida de derecha
+            const afterLeft = matchNFA(ast.left, input, pos);
+            const result = new Set();
+            for (const p of afterLeft) {
+                for (const q of matchNFA(ast.right, input, p)) result.add(q);
+            }
+            return result;
+        }
+
+        case 'star': {
+            // Cero o más: BFS sobre posiciones alcanzables
+            // (evita recursión infinita en ciclos ε)
+            const visited  = new Set([pos]);
+            const result   = new Set([pos]);   // cero repeticiones siempre válido
+            let   frontier = [pos];
+            while (frontier.length > 0) {
+                const next = [];
+                for (const p of frontier) {
+                    for (const q of matchNFA(ast.sub, input, p)) {
+                        if (!visited.has(q)) {
+                            visited.add(q);
+                            result.add(q);
+                            next.push(q);
+                        }
+                    }
+                }
+                frontier = next;
+            }
+            return result;
+        }
+
+        case 'plus': {
+            // Una o más: al menos una coincidencia del sub, luego star
+            const afterFirst = matchNFA(ast.sub, input, pos);
+            const result = new Set();
+            for (const p of afterFirst) {
+                for (const q of matchNFA({ op: 'star', sub: ast.sub }, input, p)) result.add(q);
+            }
+            return result;
+        }
+
+        case 'opt': {
+            // Cero o una: la posición actual siempre es válida
+            const result = new Set([pos]);
+            for (const q of matchNFA(ast.sub, input, pos)) result.add(q);
+            return result;
+        }
+
+        default:
+            return new Set();
+    }
+}
+
+/**
+ * Detecta espacios en blanco ASCII y Unicode
+ */
+function isWhitespace(ch) {
+    const c = ch.charCodeAt(0);
+    return (
+        (c >= 0x0009 && c <= 0x000D) ||   // \t \n \v \f \r
+        c === 0x0020 ||                    // espacio normal
+        c === 0x00A0 ||                    // non-breaking space (Google Docs)
+        c === 0x1680 ||                    // Ogham space
+        (c >= 0x2000 && c <= 0x200B) ||   // En Quad … Zero-Width Space
+        c === 0x202F ||                    // narrow no-break space
+        c === 0x205F ||                    // medium mathematical space
+        c === 0x3000 ||                    // ideographic space
+        c === 0xFEFF                       // BOM / zero-width no-break space
+    );
+}
+
+/**
+ * tokenize(input, terminalAsts)
  *
  * Convierte la cadena de entrada en un array de tokens usando los
- * patrones regex del entry. Cada token tiene la forma:
- *   { name: '$_id', lexeme: 'id', pos: 0 }
+ * ASTs del NFA generados desde el bloque Lex del lenguaje Wison.
+ *
+ * Estrategia: en cada posición se prueban todos los patrones en el
+ * orden en que fueron declarados y se toma la coincidencia más larga
+ * (longest match). En caso de empate de longitud gana el primero
+ * (prioridad por orden de declaración — permite que palabras reservadas
+ * tengan precedencia sobre identificadores genéricos).
  *
  * Retorna { tokens, errors }
- *
- * Estrategia: en cada posición intenta todos los patrones en orden
- * de declaración (orden del bloque Lex) y toma el que produce
- * la coincidencia más larga (longest match).
- * Los espacios entre tokens se saltan automáticamente.
  */
-function tokenize(input, terminalPatterns) {
+function tokenize(input, terminalAsts) {
     const tokens = [];
     const errors = [];
     let pos  = 0;
@@ -67,47 +188,33 @@ function tokenize(input, terminalPatterns) {
         }
     }
 
-    const compiled = Object.entries(terminalPatterns).map(([name, pattern]) => {
-        const cleanPattern = pattern.replace(/\\-/g, '-');
-        try {
-            return { name, regex: new RegExp('^(?:' + cleanPattern + ')', 'u') };
-        } catch(e) {
-            try {
-                return { name, regex: new RegExp('^(?:' + cleanPattern + ')') };
-            } catch(e2) {
-                console.warn('Patrón regex inválido para', name, ':', cleanPattern, e2.message);
-                return { name, regex: null };
-            }
-        }
-    }).filter(c => c.regex !== null);
+    // Pares [nombre, ast] en el orden de declaración original
+    const entries = Object.entries(terminalAsts).filter(([, ast]) => ast !== null);
 
     while (pos < input.length) {
-        // Saltar espacios en blanco
-        const spaceMatch = input.slice(pos).match(/^\s+/u);
-        if (spaceMatch) {
-            advance(spaceMatch[0].length);
-            continue;
-        }
+        // Saltar espacios en blanco carácter a carácter
+        if (isWhitespace(input[pos])) { advance(1); continue; }
 
-        // Intentar todos los patrones, tomar el más largo
-        let bestMatch = null;
-        let bestName  = null;
-        let bestLen   = 0;
+        let bestName = null;
+        let bestLen  = 0;
 
-        for (const { name, regex } of compiled) {
-            const m = input.slice(pos).match(regex);
-            if (m && m[0].length > bestLen) {
-                bestLen   = m[0].length;
-                bestMatch = m[0];
-                bestName  = name;
+        for (const [name, ast] of entries) {
+            // Simular el NFA y obtener todas las posiciones de fin posibles
+            const endPositions = matchNFA(ast, input, pos);
+            for (const endPos of endPositions) {
+                const len = endPos - pos;
+                if (len > bestLen) {   // longest match; empate primer declarado
+                    bestLen  = len;
+                    bestName = name;
+                }
             }
         }
 
-        if (bestMatch !== null) {
-            tokens.push({ name: bestName, lexeme: bestMatch, pos, line, col });
+        if (bestLen > 0) {
+            tokens.push({ name: bestName, lexeme: input.slice(pos, pos + bestLen), pos, line, col });
             advance(bestLen);
         } else {
-            // Carácter no reconocido
+            // Carácter no reconocido por ningún patrón
             errors.push({
                 type:    'lexical',
                 message: `Carácter no reconocido: "${input[pos]}"`,
@@ -339,8 +446,17 @@ function isNonTerminal(symbol) {
  * }
  */
 function evaluate(entry, input) {
-    // Etapa 1: tokenizar
-    const { tokens, errors: lexErrors } = tokenize(input, entry.terminalPatterns);
+    // Etapa 1: tokenizar usando el NFA propio (terminalAsts).
+    // Si el entry fue guardado antes de agregar terminalAsts (compatibilidad
+    // con analizadores persistidos), se requiere recompilar el analizador.
+    if (!entry.terminalAsts) {
+        return {
+            accepted: false,
+            tree: null, treeJSON: null, tokens: [], steps: [],
+            errors: [{ type: 'lexical', message: 'Este analizador fue compilado con una versión anterior. Por favor recompílalo para usar el motor NFA.' }]
+        };
+    }
+    const { tokens, errors: lexErrors } = tokenize(input, entry.terminalAsts);
 
     // Si hubo errores léxicos críticos (toda la cadena inválida), retornar ya
     if (lexErrors.length > 0 && tokens.length <= 1) {
@@ -373,4 +489,4 @@ function evaluate(entry, input) {
     };
 }
 
-module.exports = { evaluate, tokenize, analyze, TreeNode, EOF_SYM };
+module.exports = { evaluate, tokenize, analyze, matchNFA, TreeNode, EOF_SYM };

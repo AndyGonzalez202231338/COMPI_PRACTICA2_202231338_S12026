@@ -58,14 +58,35 @@
 
       @if (tokens().length > 0) {
         <div class="tokens-section">
-          <p class="section-title">Tokens reconocidos</p>
-          <div class="tokens-row">
-            @for (t of tokens(); track $index) {
-              <span class="token" [class.eof]="t.name === '$'">
-                <span class="token-lexeme">{{ t.lexeme }}</span>
-                <span class="token-name">{{ t.name }}</span>
-              </span>
-            }
+          <div class="tokens-header">
+            <p class="section-title">Tokens reconocidos</p>
+            <span class="tokens-count">{{ tokens().length - 1 }} token(s)</span>
+          </div>
+          <div class="tokens-table-wrap">
+            <table class="tokens-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Token</th>
+                  <th>Lexema</th>
+                  <th>Línea</th>
+                  <th>Col</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of tokens(); track $index) {
+                  @if (t.name !== '$') {
+                    <tr>
+                      <td class="col-num">{{ $index + 1 }}</td>
+                      <td><code class="tok-name">{{ t.name }}</code></td>
+                      <td><code class="tok-lexeme">{{ t.lexeme }}</code></td>
+                      <td class="col-pos">{{ $any(t).line ?? '—' }}</td>
+                      <td class="col-pos">{{ $any(t).col  ?? '—' }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
           </div>
         </div>
       }
